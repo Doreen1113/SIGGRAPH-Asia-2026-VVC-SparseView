@@ -31,8 +31,12 @@ scored submissions in 15 days.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/figures/pipeline_dark.png">
-  <img alt="Pipeline: per-scene person models and scene models are rendered at the hidden cameras, the person branch is ensembled and restored with Difix3D+ test-time augmentation, the background branch is perceptually projected and temporally averaged, then both are composited, colour-corrected and packaged." src="docs/figures/pipeline_light.png">
+  <img alt="Pipeline in six columns. Input: 6 training cameras around the performer. Per-scene 4D Gaussians: person models with stride-5 keyframes (+0.23 dB foreground PSNR) and seven scene models with dense depth and masked pseudo-views (+0.63 dB on validation). Render and combine: a person ensemble (foreground LPIPS -0.027) and a perceptual projection of the background (+0.20 dB). Restore and clean: Difix3D+ over three shifted tile grids (LPIPS -0.049) and a static background plate (SSIM +0.0057). Merge: soft-mask composite and per-camera colour correction (+0.68 dB). Submission: 2,056 images, 27.04 dB full and 25.78 dB foreground, 3rd place." src="docs/figures/pipeline_light.png">
 </picture>
+
+Each card lists the gain we measured for that stage, taken from two scored submissions that differ only in it.
+Everything in the figures is drawn schematically: the dataset licence does not allow redistributing its images
+(see [Dataset licence](#dataset-licence)).
 
 ## Results
 
@@ -48,68 +52,116 @@ evaluator to test ideas: several points are deliberate probes (for example witho
 isolate another change), and two are failures that we reverted.
 
 <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/stage_gains_dark.png">
+  <img alt="Change in official PSNR, SSIM and LPIPS, full image and foreground, for twelve changes. Largest PSNR gains: 3-seed ensemble +1.09 dB, colour correction +0.68 dB, recipe F +0.51 dB, Difix +0.50 dB. Difix costs 0.008 SSIM; the static plate trades 0.028 LPIPS for 0.0057 SSIM." src="docs/figures/stage_gains_light.png">
+</picture>
+
+The ranking is per metric, so a change that helps one metric can cost another. Difix bought 0.049 of LPIPS
+for 0.008 of SSIM, and the static plate went the other way. Late in the challenge, which metric to trade
+was decided by recomputing every team's rank for the candidate ([scripts/board_sim.py](scripts/board_sim.py)).
+
+## Method
+
+Half of the score is measured on a crop around the person, which covers about 6% of the pixels. We therefore
+treat the person and the background as separate problems, each with its own models and post-processing, and
+composite them at the end.
+
+### 1. Per-scene 4D Gaussians
+
+All models are [FreeTimeGS++](ftgspp/README.md) with additions that are off by default and switched on through
+environment variables ([ftgspp/MODIFICATIONS.md](ftgspp/MODIFICATIONS.md)).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/pseudo_views_dark.png">
+  <img alt="Left: schematic of one hidden view split into pixels covered by at least one training camera, where the pseudo-view loss is off, and uncovered pixels, where it is on. Right: validation PSNR. Recipe F 24.57 dB; pseudo-views on all pixels 23.61; on uncovered pixels only 25.06; recipe J 25.16; J plus the masked model 25.79." src="docs/figures/pseudo_views_light.png">
+</picture>
+
+**Pseudo-views, masked by coverage.** SEVA (Stable Virtual Camera) renders the hidden poses from the six
+training views. Supervising on the whole generated image made the person ghost: all seven unmasked variants lost
+to the baseline. Restricting the loss to pixels that no training camera sees
+([scripts/seva/coverage_mask.py](scripts/seva/coverage_mask.py)) turned the loss into a gain. The masked model
+also helps as an ensemble member and stayed in every later ensemble.
+
+Other training changes that improved the official score:
+
+* **Dense VGGT depth** (weight 0.1) on every training frame, on top of the sparse keyframe depth.
+* **Person-weighted loss** (L1+SSIM on the DeepLabV3 person region, weight 4) with 60k iterations. At 30k
+  iterations weight 4 was worse than weight 2; the longer schedule is what makes the higher weight pay off.
+* **Keyframe stride 5 instead of 10** for the point-cloud initialisation: the only structural change that
+  improved all six metrics at once on validation. Stride 3 was worse than stride 5 on the foreground metrics.
+* **Capacity and resolution.** 4M Gaussians and full-resolution training help as ensemble members; 8M Gaussians
+  overfit the six views and were worse everywhere.
+
+### 2. Choosing the person source
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/ensemble_plane_dark.png">
+  <img alt="Official foreground SSIM against foreground LPIPS for ten person sources. Diverse scene models give high SSIM but poor LPIPS; foreground specialists and extra seeds lower LPIPS; mixing half specialists and half diverse models raises SSIM; stride-5 pseudo-view models reach the best corner at SSIM 0.851 and LPIPS 0.227." src="docs/figures/ensemble_plane_light.png">
+</picture>
+
+Renders are averaged per pixel. On the official foreground scores, diverse members raised SSIM and more seeds of
+one configuration lowered LPIPS, so the final person source mixes half "person specialists" (up to 15 models of
+the recipe above) with half a diverse scene mix. Adding weaker members diluted the average: a 9-member ensemble
+scored below the 6-member one on all six metrics.
+
+### 3. Difix3D+ and perceptual projection
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/difix_frontier_dark.png">
+  <img alt="SSIM against LPIPS on validation scene 001_1. Blending in more Difix output lowers LPIPS from 0.218 toward 0.155 while SSIM falls from 0.933 toward 0.909. At the same SSIM the 3-shift TTA curve reaches lower LPIPS than the single-pass curve at high strength; the fine-tuned Difix barely lowers LPIPS. Perceptual projection toward the TTA output reaches LPIPS 0.150 at SSIM 0.927, the point used in the submission." src="docs/figures/difix_frontier_light.png">
+</picture>
+
+`nvidia/difix_ref` restores each render, using the nearest training view of the same scene as reference.
+Blending in more of its output lowers LPIPS and costs SSIM. Two things moved that frontier instead of sliding
+along it:
+
+* **Test-time augmentation.** Running Difix over three shifted tile grids and averaging removes seams and
+  grid-dependent hallucination.
+* **Perceptual projection.** Per image we optimise `LPIPS(x, Difix target) + 15 * (1 - SSIM(x, raw render))` for
+  200 steps, taking perceptual detail from the restored image and structure from the reconstruction. Projecting
+  toward the Difix output of a different, stronger ensemble (cross-target) fixed a full-image LPIPS regression
+  that projecting toward its own Difix output could not.
+
+Fine-tuning Difix on our own renders did not help: at matched SSIM the released weights were as good or better.
+
+### 4. Static background plate
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/static_plate_dark.png">
+  <img alt="Left: an unsafe plate replaces everything outside the current frame's person mask, so residue of the person from other frames leaks in. Middle: the safe plate is replaced only outside the union of all frames' masks. Right: official change. Unsafe: full SSIM +0.0057, foreground PSNR -3.0 dB, foreground SSIM -0.028. Safe: full SSIM +0.0057, foreground unchanged." src="docs/figures/static_plate_light.png">
+</picture>
+
+The cameras are fixed and the room is static, so each view's background can be averaged over time to remove
+per-frame render noise. The first version replaced everything outside the current frame's person mask and lost
+3 dB of foreground PSNR on test. The final version
+([scripts/temporal_bg_safe.py](scripts/temporal_bg_safe.py)) only replaces pixels the person occupies in no
+frame at all, and keeps the full-image SSIM gain without touching the foreground.
+
+### 5. Colour correction for hidden cameras
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/colour_dark.png">
+  <img alt="Left: three ways to apply the same camera colour offset: additive, tapered toward black, and multiplicative gain. Right: on validation, the additive offset changes SSIM by -0.042 in windows with mean intensity below 0.10, by 0.000 at 0.10 to 0.25, and by +0.005 at 0.25 to 0.50." src="docs/figures/colour_light.png">
+</picture>
+
+The baseline learns a colour corrector for each training camera, and hidden cameras never get one. Two test
+scenes share their camera rig with a public validation scene, so for those we apply a per-camera colour prior
+fitted on the matching validation scene ([scripts/camcolor2.py](scripts/camcolor2.py)). A plain additive
+offset gained 0.86 dB PSNR on test but lost SSIM: SSIM's luminance term is relative, so the same offset is a
+large error in a dark window. Gain (007) and an offset tapered toward black (011) kept the PSNR gain without the
+SSIM loss. See [Verification and disclosure](#verification-and-disclosure) for how the priors were fitted.
+
+### Where the error remains
+
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/figures/per_view_dark.png">
   <img alt="Per-view PSNR on validation scene 001_1 for three single models. Views 17, 18 and 38 stay between 18.5 and 23.2 dB for every model, while most other views reach 26 to 31.7 dB." src="docs/figures/per_view_light.png">
 </picture>
 
-The per-view chart shows where the error sits. Views 17, 18 and 38 look into parts of the room that none of
-the six training cameras sees well. All three models in the chart score 18.5-23.2 dB there, against 25-32 dB on the
-other views. A timestamp sweep on view 18 confirmed that the blur is spatial, not temporal: no render time
-makes it sharp. The data is in [docs/data/val_001_1_per_view_psnr.csv](docs/data/val_001_1_per_view_psnr.csv).
-
-Qualitative comparisons (validation ground truth against our models, and the final test renders) are
-generated by [docs/make_qualitative.py](docs/make_qualitative.py) but are not in this repository. See
-[Dataset licence](#dataset-licence).
-
-## The method on one page
-
-The metric decides the design. Half of the score is measured on a crop around the person, which covers about
-6% of the pixels, so the person and the background are treated as two separate problems and composited at the
-end.
-
-**1. Per-scene 4D Gaussian models (training).** All models are
-[FreeTimeGS++](ftgspp/README.md) with additions that are off by default and switched on through environment
-variables (listed in [ftgspp/MODIFICATIONS.md](ftgspp/MODIFICATIONS.md)). Changes that improved the official
-score:
-
-* **Dense VGGT depth** (weight 0.1) on every training frame, on top of the sparse keyframe depth.
-* **Pseudo-views from a generative model, masked by coverage.** SEVA (Stable Virtual Camera) renders the hidden
-  poses from the six training views. Supervising on the whole pseudo-view made the person ghost, and every
-  unmasked variant lost to the baseline. The version that worked supervises only the pixels that no training
-  camera covers.
-* **Person-weighted loss** (L1+SSIM on the DeepLabV3 person region, weight 4) with 60k iterations. At 30k
-  iterations weight 4 was worse than weight 2; the longer schedule is what makes the higher weight pay off.
-* **Keyframe stride 5 instead of 10** for the point-cloud initialisation. This is the only structural change
-  that improved all six metrics at once on validation. Stride 3 was worse than stride 5 on the foreground
-  metrics.
-* **Capacity and resolution.** 4M Gaussians and full-resolution training help as ensemble members; 8M Gaussians
-  overfit the six views and were worse everywhere.
-
-**2. Ensembles.** Renders are averaged per pixel. The best person source mixes half "person specialists" (up to
-15 models of the recipe above) with half a diverse scene mix. On test, diverse members raised foreground SSIM,
-while more seeds of the same configuration lowered foreground LPIPS. Adding weaker members diluted the average:
-a 9-member ensemble scored below the 6-member one on all six metrics.
-
-**3. Difix3D+ on the person branch.** `nvidia/difix_ref` restores each render, using the nearest training view
-of the same scene as reference. We average three runs over shifted tile grids (test-time augmentation). At the
-same SSIM, this reaches a lower LPIPS than a single pass, on both validation scenes.
-
-**4. Perceptual projection on the background branch.** Per image we optimise
-`LPIPS(x, Difix target) + 15 * (1 - SSIM(x, raw render))` for 200 steps: perceptual detail from the restored
-image, structure from the reconstruction. Projecting toward the Difix output of a *different*, stronger
-ensemble (cross-target) fixed a full-image LPIPS regression that projecting toward its own Difix output could
-not.
-
-**5. Static background plate.** The cameras are fixed and the room is static, so we average each view over time.
-Only pixels the person never occupies in any frame are replaced. A first version that did not enforce this cost
-3 dB of foreground PSNR on test (the `C27` drop in the chart).
-
-**6. Composite and colour.** Person over background with a soft DeepLabV3 mask (alpha 0.85, feather 101).
-Hidden cameras never receive the per-camera colour correctors that the baseline learns for training cameras, and
-two test scenes share their rig with a public validation scene. For those two scenes we apply a per-camera colour
-prior fitted on the matching validation scene: multiplicative gain for 007, and for 011 an offset tapered toward
-black. A plain additive offset gained 0.86 dB PSNR but lost SSIM, because SSIM's luminance term is relative. See
-[Verification and disclosure](#verification-and-disclosure).
+Views 17, 18 and 38 look into parts of the room that none of the six training cameras sees well. All three
+models in the chart score 18.5-23.2 dB there, against 25-32 dB on the other views. A timestamp sweep on view 18
+confirmed that the blur is spatial, not temporal: no render time makes it sharp. The data is in
+[docs/data/val_001_1_per_view_psnr.csv](docs/data/val_001_1_per_view_psnr.csv).
 
 ### What did not work
 
@@ -178,7 +230,10 @@ scripts/                everything we ran (about 150 scripts), flat, as used dur
   seva/                 SEVA pseudo-view generation, coverage masks, export to the training loader
   priors/               per-camera colour priors fitted on the validation scenes
 docs/
-  figures/              README figures (data only); make_figures.py and make_pipeline.py rebuild them
+  figures/              README figures, light and dark (no dataset images)
+  make_figures.py       progress and per-view charts, and data/submissions.csv
+  make_pipeline.py      pipeline overview
+  make_analysis.py      stage gains, Difix frontier, person source, pseudo-views, static plate, colour
   data/                 submissions.csv (every scored submission), per-view validation PSNR
   EXPERIMENT_LOG.md     the lab notebook, chronological, English and Traditional Chinese
   make_qualitative.py   builds comparison images into docs/qualitative/ (not committed)
