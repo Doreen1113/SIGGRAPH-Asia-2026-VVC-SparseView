@@ -1,0 +1,1 @@
+G3M_FR_s0 011_0_seq0 data.scale=1.0 init.num_gaussians=3000000

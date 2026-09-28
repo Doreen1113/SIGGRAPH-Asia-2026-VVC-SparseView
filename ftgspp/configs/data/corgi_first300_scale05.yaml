@@ -1,0 +1,15 @@
+name: corgi_first300_scale05
+fps: 60.0
+root: /nas1/datasets/SiggraphAisa2026VVC/selfcap/compression/test/0525_corgi
+video_path: ${data.root}
+calibration_path: ${data.root}
+extracted_path: ${data.root}/images
+scale: 0.5
+frames:
+  start: 0
+  stop: 300
+
+# Resolved automatically from train_*.yml and test_*.yml.
+train_cameras: null
+eval_cameras: null
+camera_split_source: null

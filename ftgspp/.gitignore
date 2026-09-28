@@ -1,0 +1,48 @@
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Python caches / extensions
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ipynb_checkpoints/
+
+# Python packaging / environments
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Runtime artifacts / profiling
+*.lprof
+*.prof
+*.log
+nohup.out
+profiling/
+.hydra/
+wandb/
+
+# Project-generated outputs
+/_extracted
+/_colmap
+/_points
+/_memmap
+/_flow
+/_run
+/runs/
+/tests/
+/tmp/

@@ -1,0 +1,4 @@
+frame_interval: 10
+num_workers: 4
+prefetch_factor: 2
+pin_memory: true

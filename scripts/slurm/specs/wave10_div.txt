@@ -1,0 +1,18 @@
+FGW30_L60K 004_1_seq0 FTGSPP_FG_WEIGHT=3.0 data.scale=1.0 train.iterations=60000
+FGW50_L60K 004_1_seq0 FTGSPP_FG_WEIGHT=5.0 data.scale=1.0 train.iterations=60000
+FGW40_LP5_L60K 004_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_LPIPS_W=0.5 data.scale=1.0 train.iterations=60000
+FGW30_L60K 006_1_seq0 FTGSPP_FG_WEIGHT=3.0 data.scale=1.0 train.iterations=60000
+FGW50_L60K 006_1_seq0 FTGSPP_FG_WEIGHT=5.0 data.scale=1.0 train.iterations=60000
+FGW40_LP5_L60K 006_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_LPIPS_W=0.5 data.scale=1.0 train.iterations=60000
+FGW30_L60K 007_0_seq0 FTGSPP_FG_WEIGHT=3.0 data.scale=1.0 train.iterations=60000
+FGW50_L60K 007_0_seq0 FTGSPP_FG_WEIGHT=5.0 data.scale=1.0 train.iterations=60000
+FGW40_LP5_L60K 007_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_LPIPS_W=0.5 data.scale=1.0 train.iterations=60000
+FGW30_L60K 009_0_seq0 FTGSPP_FG_WEIGHT=3.0 data.scale=1.0 train.iterations=60000
+FGW50_L60K 009_0_seq0 FTGSPP_FG_WEIGHT=5.0 data.scale=1.0 train.iterations=60000
+FGW40_LP5_L60K 009_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_LPIPS_W=0.5 data.scale=1.0 train.iterations=60000
+FGW30_L60K 011_0_seq0 FTGSPP_FG_WEIGHT=3.0 data.scale=1.0 train.iterations=60000
+FGW50_L60K 011_0_seq0 FTGSPP_FG_WEIGHT=5.0 data.scale=1.0 train.iterations=60000
+FGW40_LP5_L60K 011_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_LPIPS_W=0.5 data.scale=1.0 train.iterations=60000
+FGW30_L60K 001_1_seq0 FTGSPP_FG_WEIGHT=3.0 data.scale=1.0 train.iterations=60000
+FGW50_L60K 001_1_seq0 FTGSPP_FG_WEIGHT=5.0 data.scale=1.0 train.iterations=60000
+FGW40_LP5_L60K 001_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_LPIPS_W=0.5 data.scale=1.0 train.iterations=60000

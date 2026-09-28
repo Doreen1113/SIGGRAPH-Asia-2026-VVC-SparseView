@@ -1,0 +1,1 @@
+FGW60_L90K 004_1_seq0 FTGSPP_FG_WEIGHT=6.0 data.scale=1.0 train.iterations=90000

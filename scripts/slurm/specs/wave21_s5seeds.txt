@@ -1,0 +1,15 @@
+S5_FGW40_L60K_s4 004_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_004_1_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=4
+S5_FGW40_L60K_s4 006_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_006_1_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=4
+S5_FGW40_L60K_s4 007_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_007_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=4
+S5_FGW40_L60K_s4 009_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_009_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=4
+S5_FGW40_L60K_s4 011_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_011_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=4
+S5_FGW40_L60K_s5 004_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_004_1_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=5
+S5_FGW40_L60K_s5 006_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_006_1_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=5
+S5_FGW40_L60K_s5 007_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_007_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=5
+S5_FGW40_L60K_s5 009_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_009_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=5
+S5_FGW40_L60K_s5 011_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_011_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=5
+S5_FGW40_L60K_s6 004_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_004_1_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=6
+S5_FGW40_L60K_s6 006_1_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_006_1_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=6
+S5_FGW40_L60K_s6 007_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_007_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=6
+S5_FGW40_L60K_s6 009_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_009_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=6
+S5_FGW40_L60K_s6 011_0_seq0 FTGSPP_FG_WEIGHT=4.0 FTGSPP_POINTS_DIR=/work/doreen071/vvc/runs/siga_011_0_seq0/points_stride5 MINPLY=90 data.scale=1.0 train.iterations=60000 init.keyframe_stride=5 train.seed=6

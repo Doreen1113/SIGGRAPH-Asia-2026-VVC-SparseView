@@ -1,0 +1,13 @@
+name: selfcap_0811_yoga
+fps: 60.0
+root: /home/intern_2603055/vvc/data/0811_yoga
+video_path: ${data.root}
+calibration_path: ${data.root}
+extracted_path: ${data.root}/images
+scale: 1.0
+frames:
+  start: 0
+  stop: 900
+train_cameras: null
+eval_cameras: null
+camera_split_source: null

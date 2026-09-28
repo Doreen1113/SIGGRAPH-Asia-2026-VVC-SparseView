@@ -1,0 +1,17 @@
+defaults:
+  - schema: config
+  - model: explicit
+  - data: corgi_first300_scale05
+  - init: roma_indoor_2m
+  - train: 30k
+  - eval: default
+  - run: local
+  - pipeline: full
+  - _self_
+
+hydra:
+  job:
+    chdir: false
+  run:
+    dir: ${run.output_path}
+  output_subdir: .hydra

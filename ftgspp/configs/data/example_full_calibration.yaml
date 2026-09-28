@@ -1,0 +1,15 @@
+name: example_full_calibration
+fps: 60.0
+root: /path/to/dataset
+video_path: ${data.root}
+calibration_path: ${data.root}
+extracted_path: ${data.root}/images
+scale: 0.5
+frames:
+  start: 0
+  stop: 300
+
+# Required when only intri.yml/extri.yml exist. Training cameras are the complement.
+train_cameras: null
+eval_cameras: [0]
+camera_split_source: null

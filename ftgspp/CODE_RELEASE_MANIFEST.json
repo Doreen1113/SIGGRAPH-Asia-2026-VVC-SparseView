@@ -1,0 +1,395 @@
+{
+  "created_at_utc": "2026-07-15T06:36:49.495721+00:00",
+  "source": "/mnt/data/home/shentuyinji/SigA2026VVC/release_code/ftgspp",
+  "output": "/nas1/datasets/SiggraphAisa2026VVC/hf_release_upload/SiggraphAisa2026VVC/baseline_code",
+  "description": "FTGSPP code release for the SiggraphAsia2026VVC challenge.",
+  "excludes": [
+    ".git",
+    ".git/**",
+    ".venv",
+    ".venv/**",
+    "__pycache__",
+    "**/__pycache__/**",
+    "*.pyc",
+    "*.pyo",
+    "*.egg-info",
+    "*.egg-info/**",
+    ".pytest_cache",
+    ".pytest_cache/**",
+    ".mypy_cache",
+    ".mypy_cache/**",
+    ".ruff_cache",
+    ".ruff_cache/**",
+    ".cache",
+    ".cache/**",
+    "runs",
+    "runs/**",
+    "outputs",
+    "outputs/**",
+    "wandb",
+    "wandb/**",
+    "tensorboard",
+    "tensorboard/**",
+    "*.pt",
+    "*.pth",
+    "*.ckpt",
+    "*.ply",
+    "*.tar",
+    "*.tar.gz",
+    "*.zip",
+    "*.mp4",
+    "*.mov",
+    "*.avi",
+    "*.memmap"
+  ],
+  "num_files": 69,
+  "total_bytes": 403321,
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 491,
+      "sha256": "a50869e7c079f40b4bf2970e207ea0a0555522f61afe131c9cfad3dbcd207e62"
+    },
+    {
+      "path": "Dockerfile",
+      "bytes": 2075,
+      "sha256": "2f07d03316b27e78132ba76bafcb8f8bff78353adf327d54ec2f192103f57048"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 3430,
+      "sha256": "be8a97ae1c85fde084ca7fb6f047610c9b628879e55c7229282f3e780de54540"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5323,
+      "sha256": "855ae7ea2c1ac580372bc29cbfa68e379a5b62483ad1059958db99ca7583a058"
+    },
+    {
+      "path": "SOURCE_REVISION",
+      "bytes": 154,
+      "sha256": "93a9c78f42931039be785ebf2d626e272ef3d838ffba5d7dc4ab4a385daa17f8"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "bytes": 2620,
+      "sha256": "71cb4af2eab15876e85041f371506a27ff44838b8279771a654dfd3de2e57f3b"
+    },
+    {
+      "path": "configs/config.yaml",
+      "bytes": 276,
+      "sha256": "33835d6dabc0cd4dfc612b7348a8b6806608b29a6caec57b1633639e2fbe244b"
+    },
+    {
+      "path": "configs/data/corgi_first300_scale05.yaml",
+      "bytes": 374,
+      "sha256": "836247450e230fa0d81e8f14da4631df6e0a85fc0292a1ad206a0ebf1ee4f410"
+    },
+    {
+      "path": "configs/data/example_full_calibration.yaml",
+      "bytes": 348,
+      "sha256": "06754936f8acc0e5b570fd4d93d31d0fc083d957e8a725f3789206fb2c77f49e"
+    },
+    {
+      "path": "configs/eval/default.yaml",
+      "bytes": 70,
+      "sha256": "42fc986b12be5103c5e673d0346b5c370bd5d0214178b95b0d2222c0b762b2e7"
+    },
+    {
+      "path": "configs/init/roma_indoor_1m.yaml",
+      "bytes": 421,
+      "sha256": "ec3b42c2d36f024df7bd31c434e256edb3aad371ff781f80e29a74122db8c22a"
+    },
+    {
+      "path": "configs/init/roma_indoor_2m.yaml",
+      "bytes": 421,
+      "sha256": "98a03453c00c91a15c10002e3afa9f34f108468484326125f8c5288e1ff07f0b"
+    },
+    {
+      "path": "configs/init/roma_outdoor_1m.yaml",
+      "bytes": 422,
+      "sha256": "73e2275a1fa298fd2157b391267a11fd82c507745f6e7ce53a364b8baee24658"
+    },
+    {
+      "path": "configs/init/roma_outdoor_2m.yaml",
+      "bytes": 422,
+      "sha256": "a0bbef24b81ec158c39dce3de1cbfba76fe7baf3d0d498bcdcfabf15a3ad7dbb"
+    },
+    {
+      "path": "configs/model/explicit.yaml",
+      "bytes": 48,
+      "sha256": "4fe4893d6f52415cfe639b06bbe018cf1026465395617f45dd54dee180e7df5b"
+    },
+    {
+      "path": "configs/model/field.yaml",
+      "bytes": 45,
+      "sha256": "20020147faafddda9e60d0a9f531cc41c0a46cda374844880f8488115364c64c"
+    },
+    {
+      "path": "configs/pipeline/check.yaml",
+      "bytes": 28,
+      "sha256": "a3f00568484cc2a9c5e988f2d1b1053d2292c55f9ee9754c222618b265977895"
+    },
+    {
+      "path": "configs/pipeline/full.yaml",
+      "bytes": 56,
+      "sha256": "125b34883a07993399afa8742b9241af1270149805ce4bfcd0ee805c221dfdd2"
+    },
+    {
+      "path": "configs/pipeline/train_only.yaml",
+      "bytes": 42,
+      "sha256": "9def6fa3c0a018ad6995481b71cc2e370edd67d4ea0378ef47edfee3eb74207d"
+    },
+    {
+      "path": "configs/run/local.yaml",
+      "bytes": 236,
+      "sha256": "7bf51dbd6cfc28dddd02dc3fc0bbb27a39d213286c3d7dd763366a94c7c1df35"
+    },
+    {
+      "path": "configs/train/30k.yaml",
+      "bytes": 772,
+      "sha256": "f2db7050403b9b295f4cf34258b3490457edf484f01e4ed86c0dc8e01fd8f3b9"
+    },
+    {
+      "path": "configs/train/debug.yaml",
+      "bytes": 646,
+      "sha256": "5a71857cd5445cfafdb967226c623947e643aca6c276f9f2631163537ed97f9b"
+    },
+    {
+      "path": "ftgspp/__init__.py",
+      "bytes": 82,
+      "sha256": "8a8ed5f595023382906f86ec0690dc7088c00f7f6c21ef903cc9c14ea09f03cb"
+    },
+    {
+      "path": "ftgspp/config/__init__.py",
+      "bytes": 357,
+      "sha256": "c6354e5880b208d7d20db15632f3fcdf0dee023e9feeb9ccd95f8986908c73d4"
+    },
+    {
+      "path": "ftgspp/config/compose.py",
+      "bytes": 2821,
+      "sha256": "62541c5075e6c3f8f07cdb5fb08fd82ebb7228cba9825c104cfa8769901e528e"
+    },
+    {
+      "path": "ftgspp/config/paths.py",
+      "bytes": 913,
+      "sha256": "cf98cebc6d16aba01f7fa1871fe47749e0e69241e2f1d2e2d4d402edb3feca05"
+    },
+    {
+      "path": "ftgspp/config/register.py",
+      "bytes": 544,
+      "sha256": "e8ce1028e6a667da1708232d64265742b510c76bef41e6df41d7d9492cb49bb3"
+    },
+    {
+      "path": "ftgspp/config/schema.py",
+      "bytes": 4016,
+      "sha256": "bb307bfdc6167d83ae946c985b5d1ef58544d1b09fc0933c50839dcb2d6b481b"
+    },
+    {
+      "path": "ftgspp/config/validate.py",
+      "bytes": 4404,
+      "sha256": "36a37c1c311be924752d5c8803d71a837f7fa127e3e90c2342c073062754a614"
+    },
+    {
+      "path": "ftgspp/data/__init__.py",
+      "bytes": 82,
+      "sha256": "8a8ed5f595023382906f86ec0690dc7088c00f7f6c21ef903cc9c14ea09f03cb"
+    },
+    {
+      "path": "ftgspp/data/extract.py",
+      "bytes": 8789,
+      "sha256": "43c97264fcc746e0f5766cdd09fc36f6d53f131a94f68307d3470920dfb5041d"
+    },
+    {
+      "path": "ftgspp/data/flow.py",
+      "bytes": 9898,
+      "sha256": "a646c21e2ecf7cfee6ab2e921a63dda3675ff412e45c84e2892c9068c5986963"
+    },
+    {
+      "path": "ftgspp/data/utils/__init__.py",
+      "bytes": 483,
+      "sha256": "5148ae83bc8ec638aef9faed707e334b14d0b8a9867dd3945e1d9bafdccec4a9"
+    },
+    {
+      "path": "ftgspp/data/utils/dataset.py",
+      "bytes": 358,
+      "sha256": "ba500000b9b0f1260f8dd9d74d2df1875c66909449fe5dddaff813ae8019f25c"
+    },
+    {
+      "path": "ftgspp/data/utils/easy_utils.py",
+      "bytes": 3337,
+      "sha256": "2a108e83d20c93722da03d6d80eb6a6e4c7e8f5951035eb9ff2471907f9f1f04"
+    },
+    {
+      "path": "ftgspp/data/utils/images.py",
+      "bytes": 438,
+      "sha256": "bc641fd740adf027c32f8e235761b5aab03bc4fc5dab0863b69b739f48d4b36a"
+    },
+    {
+      "path": "ftgspp/data/utils/loader.py",
+      "bytes": 2945,
+      "sha256": "c3ffa737177615dc8da721641cdfe8df6fb215130032af31b78e99bd3c0262ad"
+    },
+    {
+      "path": "ftgspp/data/utils/mvdataset.py",
+      "bytes": 35909,
+      "sha256": "bd547affca72657cbe0aafa68b1606720cc0dc295834f720d5aabb571021e6dd"
+    },
+    {
+      "path": "ftgspp/data/utils/undistort.py",
+      "bytes": 5421,
+      "sha256": "37978cfb13ab4e684617cc24771e0d1406b06bba0ec92e389e3ade0dff20e442"
+    },
+    {
+      "path": "ftgspp/eval.py",
+      "bytes": 8247,
+      "sha256": "5b5220ab555b193a57d25706027f6ec20801af2b66034a0a47457be4c30f7e36"
+    },
+    {
+      "path": "ftgspp/export.py",
+      "bytes": 454,
+      "sha256": "8e95c7d52c9180334b0076f625b9ae843b33359bf290ba0252e7e6688da6d448"
+    },
+    {
+      "path": "ftgspp/init/__init__.py",
+      "bytes": 9137,
+      "sha256": "e3830331f6826cbbeb833c83928e14d76144294ab03df1fec2aa654ad1ea6923"
+    },
+    {
+      "path": "ftgspp/init/__main__.py",
+      "bytes": 1846,
+      "sha256": "1fa48581ed4cfe44e2814c5581d8539adc1bcc4f2d958e17c91fde9967381b16"
+    },
+    {
+      "path": "ftgspp/init/matcher.py",
+      "bytes": 4793,
+      "sha256": "667282b095924b65ec4fcae646ea259f78e0b65a63d0d6953e7478c962b1de02"
+    },
+    {
+      "path": "ftgspp/init/points.py",
+      "bytes": 10348,
+      "sha256": "3afdb7ff16d2527aa239e79f3dd99cc0450b13e4e11f697a667fe7da357fd912"
+    },
+    {
+      "path": "ftgspp/init/temporal.py",
+      "bytes": 7994,
+      "sha256": "d16658a2b7e5be91bc16fb3385374d75ef805cbdd8c79d08ad62072de193ca97"
+    },
+    {
+      "path": "ftgspp/models/__init__.py",
+      "bytes": 415,
+      "sha256": "187ffc90c5891d9275f3e00e92e3414286733c2c8cae745a091482d289e5d696"
+    },
+    {
+      "path": "ftgspp/models/colorcorrect.py",
+      "bytes": 1386,
+      "sha256": "13150e5de092d21393d1a86e2bee6c7d72b71fecb9229e890de0e4ab0f309af7"
+    },
+    {
+      "path": "ftgspp/models/gaussians.py",
+      "bytes": 8431,
+      "sha256": "5256d9b055de4dd848d26785d1f9cc9d8d3cfff9fcf1e499ad9fc505ded342f0"
+    },
+    {
+      "path": "ftgspp/models/velocity.py",
+      "bytes": 6087,
+      "sha256": "e780f8db2f7497e9b4daffead6f92ab358ef0d82a0c82a32bc1f5f140db9a207"
+    },
+    {
+      "path": "ftgspp/render.py",
+      "bytes": 13866,
+      "sha256": "8cbe6947961af60d3f6ada30d719c33e7abcf0b4c52827041f9e2084c02972fb"
+    },
+    {
+      "path": "ftgspp/run.py",
+      "bytes": 643,
+      "sha256": "53eb66c4828885fd1aa205e269eae81775a89e9e99a5dcb73af3b6edc75f3964"
+    },
+    {
+      "path": "ftgspp/runner.py",
+      "bytes": 5337,
+      "sha256": "dc165235f96f3a13c91173c7c08ad84fe6c92c8ed23f841bdb7a55d46c7578d5"
+    },
+    {
+      "path": "ftgspp/train/__init__.py",
+      "bytes": 12174,
+      "sha256": "14e8906d85095579498b08cc82c99439fbb20b1946f2ea2ffce1edf38b9417bd"
+    },
+    {
+      "path": "ftgspp/train/__main__.py",
+      "bytes": 1677,
+      "sha256": "10f6219adb9e85a278edf2e9be52431a23ccdce5bcb016c08f6bae1b85caac21"
+    },
+    {
+      "path": "ftgspp/train/optim.py",
+      "bytes": 1098,
+      "sha256": "73fcc7d973cbdfad70292168cf299a898019f90e8ffd1c09e663caf13892dc83"
+    },
+    {
+      "path": "ftgspp/train/relocation.py",
+      "bytes": 5583,
+      "sha256": "5962b5a55166711d7e5faf70e7a7b4d57db93927949139f706419d66869ff9d1"
+    },
+    {
+      "path": "ftgspp/train/state.py",
+      "bytes": 1079,
+      "sha256": "0742a31912890298e7dc0bc31966bb7842b6cbcb9273110dfc6b02d71be16802"
+    },
+    {
+      "path": "ftgspp/train/train.py",
+      "bytes": 17180,
+      "sha256": "b80a2d71fc06189fea316eb4b2c63ebaaad3be02b26053a55011616291ffcf58"
+    },
+    {
+      "path": "ftgspp/utils/__init__.py",
+      "bytes": 359,
+      "sha256": "5d81253f67d81a9ca67589177d0ea1c56a5484c91d3d2fc045499ef76a9c96af"
+    },
+    {
+      "path": "ftgspp/utils/io.py",
+      "bytes": 4288,
+      "sha256": "d996d3492aaab78811e4d5174fcd327fe3342c6c760244a5c5aac7b1769f9c5a"
+    },
+    {
+      "path": "ftgspp/utils/math.py",
+      "bytes": 3347,
+      "sha256": "fb271bb9d7709dceceacc1bc76620e1eef0cf6d4b25eebc6a752ccae70f22cc6"
+    },
+    {
+      "path": "ftgspp/utils/pipeline.py",
+      "bytes": 526,
+      "sha256": "7a9566c60e6bbbbb88cacbd072f62e17b14198474dd01d07521c96e8a42a4345"
+    },
+    {
+      "path": "ftgspp/utils/sys.py",
+      "bytes": 408,
+      "sha256": "732f28fa010b4429bc2ffd5e0ad5b82d3753bfd153ec7aea6b1b74ac013f17c0"
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 2231,
+      "sha256": "d57f6fae3a0f8bd2e9d02bdf426a9232dda6020bbe5e5c79bb409579f0e4dfa9"
+    },
+    {
+      "path": "scripts/export_ftgspp_4dgs_ply.py",
+      "bytes": 5998,
+      "sha256": "9143af86174a5cfededb7735264a9c92f2aaf5121e423a645c6a80a5c3378983"
+    },
+    {
+      "path": "scripts/install_env.sh",
+      "bytes": 4651,
+      "sha256": "3041b7eb6aa0c64831df73470876d1f8a3041e5f8b6b79e2c1287a0d964a5314"
+    },
+    {
+      "path": "scripts/render_test_views.py",
+      "bytes": 3851,
+      "sha256": "0c84d33b89eccf2dd93e9ad0d65c0b3d71f26da11053dd1620eead40c8f5a73b"
+    },
+    {
+      "path": "uv.lock",
+      "bytes": 160370,
+      "sha256": "ce0ac7054aeacccf70f2732e90468a14bc62317de88a20974780f805a71cafc5"
+    }
+  ],
+  "skipped_count": 43
+}

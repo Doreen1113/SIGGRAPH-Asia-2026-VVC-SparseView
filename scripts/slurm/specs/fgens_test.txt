@@ -1,0 +1,10 @@
+FGW40_L60K_s1 004_1_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=1
+FGW40_L60K_s1 006_1_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=1
+FGW40_L60K_s1 007_0_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=1
+FGW40_L60K_s1 009_0_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=1
+FGW40_L60K_s1 011_0_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=1
+FGW40_L60K_s2 004_1_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=2
+FGW40_L60K_s2 006_1_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=2
+FGW40_L60K_s2 007_0_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=2
+FGW40_L60K_s2 009_0_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=2
+FGW40_L60K_s2 011_0_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=2

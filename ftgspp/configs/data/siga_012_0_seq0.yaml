@@ -1,0 +1,13 @@
+name: siga_012_0_seq0
+fps: 60.0
+root: /home/intern_2603055/vvc/data/012_0_seq0
+video_path: ${data.root}
+calibration_path: ${data.root}
+extracted_path: ${data.root}/images
+scale: 0.5
+frames:
+  start: 0
+  stop: 492
+train_cameras: null
+eval_cameras: null
+camera_split_source: null

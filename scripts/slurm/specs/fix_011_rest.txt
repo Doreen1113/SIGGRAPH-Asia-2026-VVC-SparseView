@@ -1,0 +1,3 @@
+GATE_FR_s0 011_0_seq0 data.scale=1.0 model.marginal_gating=true
+G4M_FR_s0 011_0_seq0 data.scale=1.0 init.num_gaussians=4000000
+FULLRES_s1 011_0_seq0 data.scale=1.0 train.seed=1

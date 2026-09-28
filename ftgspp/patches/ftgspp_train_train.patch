@@ -1,0 +1,349 @@
+--- a/ftgspp/train/train.py
++++ b/ftgspp/train/train.py
+@@ -134,8 +134,117 @@
+         ).mean().clamp(min=1e-6)
+ 
+     postfix = {}
++    depth_w = float(os.environ.get("FTGSPP_DEPTH_W", "0"))
++    depth_pts = {}
++    if depth_w > 0:
++        from ftgspp.utils.io import read_ply_points
++        pdir = Path(os.environ["FTGSPP_POINTS_DIR"])
++        for ply in sorted(pdir.glob("f*.ply")):
++            xyz, _ = read_ply_points(ply)
++            depth_pts[int(ply.stem[1:])] = torch.tensor(xyz, dtype=torch.float32).cuda()
++        logger.info("depth supervision: weight=%.3f keyframes=%d", depth_w, len(depth_pts))
++    dense_w = float(os.environ.get("FTGSPP_DENSE_W", "0"))
++    dense_dir = Path(os.environ.get("FTGSPP_DENSE_DEPTH_DIR", "")) if dense_w > 0 else None
++    dense_conf_thr = float(os.environ.get("FTGSPP_DENSE_CONF", "2.0"))
++    dense_cache = {}
++    if dense_w > 0:
++        import numpy as _np
++        cam_names_by_id = {int(c): dataset.camera_name(int(c)) for c in train_cameras}
++        def _load_dense(frame_id):
++            if frame_id not in dense_cache:
++                f = dense_dir / f"f{frame_id:06d}.npz"
++                if not f.exists():
++                    dense_cache[frame_id] = None
++                else:
++                    z = _np.load(f); views = [str(v) for v in z["views"]]
++                    dense_cache[frame_id] = {v: (torch.from_numpy(z["depth"][i].astype(_np.float32)), torch.from_numpy(z["conf"][i].astype(_np.float32))) for i, v in enumerate(views)}
++                if len(dense_cache) > 64:
++                    dense_cache.pop(next(iter(dense_cache)))
++            return dense_cache[frame_id]
++        logger.info("dense depth supervision: weight=%.3f dir=%s conf>%.1f", dense_w, dense_dir, dense_conf_thr)
++    unseen_every = int(os.environ.get("FTGSPP_UNSEEN_EVERY", "0"))
++    unseen_w = float(os.environ.get("FTGSPP_UNSEEN_W", "0.05"))
++    unseen_patch = int(os.environ.get("FTGSPP_UNSEEN_PATCH", "256"))
++    unseen_start = int(os.environ.get("FTGSPP_UNSEEN_START", "1000"))
++    unseen_pool = None
++    if unseen_every > 0:
++        _tw = train_set[0, :].w2c.reshape(-1, 4, 4).float()
++        _tk = train_set[0, :].intrinsic.reshape(-1, 3, 3).float()
++        _c2w = torch.inverse(_tw)
++        logger.info("unseen-view regularization: every=%d w=%.4f patch=%d cams=%d", unseen_every, unseen_w, unseen_patch, len(_c2w))
++        unseen_pool = (_c2w.cuda(), _tk.cuda())
+     tb_writer = SummaryWriter(log_dir=str(run_path / "tensorboard"))
+     train_eval_interval = int(os.environ.get("FTGSPP_TRAIN_EVAL_INTERVAL", "500"))
++    # ---- pseudo-view supervision (generated novel views at held-out cameras) ----
++    pseudo_w = float(os.environ.get("FTGSPP_PSEUDO_W", "0"))
++    pseudo_items = []
++    pseudo_lpips_w = float(os.environ.get("FTGSPP_PSEUDO_LPIPS", "0"))
++    pseudo_every = int(os.environ.get("FTGSPP_PSEUDO_EVERY", "1"))
++    pseudo_start = int(os.environ.get("FTGSPP_PSEUDO_START", "0"))
++    pseudo_colorfit = int(os.environ.get("FTGSPP_PSEUDO_COLORFIT", "1"))
++    pseudo_pool = int(os.environ.get("FTGSPP_PSEUDO_POOL", "1"))  # avg-pool factor: supervise only low-frequency content
++    pseudo_damp = float(os.environ.get("FTGSPP_PSEUDO_COLORFIT_DAMP", "0.5"))  # 1.0 = full affine color fit
++    pseudo_lpips_fn = None
++    if pseudo_w > 0:
++        import json as _json
++        import numpy as _np
++        import cv2 as _cv2
++        pdir = Path(os.environ["FTGSPP_PSEUDO_DIR"])
++        for e in _json.load(open(pdir / "index.json")):
++            im = _cv2.imread(str(pdir / e["path"]))[..., ::-1]
++            mpath = pdir / e["path"].replace(".png", "_mask.png")
++            pmask = None
++            if int(os.environ.get("FTGSPP_PSEUDO_MASK", "1")) and mpath.exists():
++                pmask = torch.from_numpy(_cv2.imread(str(mpath), 0)).float().div(255).cuda()[None, ..., None]  # 1HW1, 1 = supervise (background)
++            cpath = pdir / e["path"].replace(".png", "_covered.png")
++            if int(os.environ.get("FTGSPP_PSEUDO_COVERAGE", "1")) and cpath.exists():
++                # covered.png: 255 = already seen by a train camera (skip), 0 = uncovered (safe to supervise)
++                cov = torch.from_numpy(_cv2.imread(str(cpath), 0)).float().div(255).cuda()[None, ..., None]
++                pmask = (1 - cov) if pmask is None else pmask * (1 - cov)
++            apath = pdir / e["path"].replace(".png", "_agree.png")
++            if int(os.environ.get("FTGSPP_PSEUDO_AGREE", "1")) and apath.exists():
++                # agree.png: 255 = multi-seed samples agree (trustworthy), 0 = seva is guessing (skip)
++                agr = torch.from_numpy(_cv2.imread(str(apath), 0)).float().div(255).cuda()[None, ..., None]
++                pmask = agr if pmask is None else pmask * agr
++            pseudo_items.append(dict(
++                mask=pmask,
++                rgb=torch.from_numpy(_np.ascontiguousarray(im)).float().div(255).cuda()[None],  # 1HW3
++                t=torch.tensor(float(e["t"])).cuda(),
++                w2c=torch.tensor(_np.array(e["w2c"], dtype=_np.float32)).cuda()[None],
++                K=torch.tensor(_np.array(e["K"], dtype=_np.float32)).cuda()[None],
++                h=int(e["h"]), w=int(e["w"]), view=e["view"], frame=int(e["frame"]),
++                sample_w=float(pmask.mean()) if pmask is not None else 1.0,  # supervised-pixel fraction -> sampling weight
++            ))
++        if pseudo_lpips_w > 0:
++            pseudo_lpips_fn = LearnedPerceptualImagePatchSimilarity(net_type="alex", normalize=False).cuda()
++        logger.info("pseudo-view supervision: weight=%.3f lpips=%.3f n=%d (masked %d, mean keep frac %.3f) every=%d start=%d colorfit=%d pool=%d damp=%.2f",
++                    pseudo_w, pseudo_lpips_w, len(pseudo_items), sum(p["mask"] is not None for p in pseudo_items),
++                    float(torch.stack([p["mask"].float().mean() for p in pseudo_items if p["mask"] is not None]).mean()) if any(p["mask"] is not None for p in pseudo_items) else 1.0,
++                    pseudo_every, pseudo_start, pseudo_colorfit, pseudo_pool, pseudo_damp)
++    pseudo_rng = torch.Generator().manual_seed(seed + 12345)
++    # ---- foreground (person) emphasis on REAL training-view supervision ----
++    fg_weight = float(os.environ.get("FTGSPP_FG_WEIGHT", "0"))
++    sil_weight = float(os.environ.get("FTGSPP_SIL_WEIGHT", "0"))  # silhouette (rendered alpha vs person mask) BCE+Dice
++    odecay = float(os.environ.get("FTGSPP_ODECAY", "0"))          # visibility-aware opacity decay factor, e.g. 0.9995
++    odecay_every = int(os.environ.get("FTGSPP_ODECAY_EVERY", "200"))
++    odecay_start = int(os.environ.get("FTGSPP_ODECAY_START", "2000"))
++    fg_seg_model = None
++    if fg_weight > 0 or sil_weight > 0:
++        from torchvision.models.segmentation import deeplabv3_resnet101, DeepLabV3_ResNet101_Weights
++        fg_seg_model = deeplabv3_resnet101(weights=DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1).cuda().eval().half()
++        for p_ in fg_seg_model.parameters():
++            p_.requires_grad_(False)
++        fg_mean = torch.tensor([0.485, 0.456, 0.406]).cuda().view(1, 3, 1, 1)
++        fg_std = torch.tensor([0.229, 0.224, 0.225]).cuda().view(1, 3, 1, 1)
++        fg_dilate = int(os.environ.get("FTGSPP_FG_DILATE", "8"))
++        logger.info("foreground emphasis: weight=%.3f dilate=%d", fg_weight, fg_dilate)
++    pseudo_sample_pow = float(os.environ.get("FTGSPP_PSEUDO_SAMPLE_POW", "0"))  # >0: oversample low-coverage views ~ sample_w^pow
++    pseudo_sample_probs = None
++    if pseudo_items and pseudo_sample_pow > 0:
++        w = torch.tensor([max(it["sample_w"], 1e-3) ** pseudo_sample_pow for it in pseudo_items])
++        pseudo_sample_probs = w / w.sum()
++        logger.info("pseudo sampling reweighted by (supervised fraction)^%.2f: min=%.4f max=%.4f (vs uniform %.4f)",
++                    pseudo_sample_pow, pseudo_sample_probs.min().item(), pseudo_sample_probs.max().item(), 1.0 / len(pseudo_items))
+ 
+     for it in (bar := tqdm(range(start_iteration, start_iteration + iterations))):
+         rr.set_time("iteration", sequence=it)
+@@ -145,7 +254,15 @@
+         t = batch.time[0]
+         cams = [int(camera) for camera in batch.camera]  # type: ignore
+ 
+-        pred_, _, aux = gs(
++        frame_id = int(batch.frame[0]) if (depth_w > 0 or dense_w > 0) else -1
++        dense_tgt = None
++        if dense_w > 0:
++            dd = _load_dense(frame_id)
++            cname = cam_names_by_id.get(cams[0])
++            if dd is not None and cname in dd:
++                dense_tgt = dd[cname]
++        use_depth = (frame_id in depth_pts) or (dense_tgt is not None)
++        pred_, pred_alpha, aux = gs(
+             t=t,
+             w2c=batch.w2c,
+             intrinsic=batch.intrinsic,
+@@ -153,7 +270,34 @@
+             sh_degree=min(it // 1000, gs.sh_degree)
+             if sh_degree_schedule
+             else gs.sh_degree,
++            render_depth=use_depth,
+         )
++        loss_depth = torch.zeros((), device=pred_.device)
++        if dense_tgt is not None:
++            dz, dc = dense_tgt
++            dz = torch.nn.functional.interpolate(dz[None, None].cuda(), size=(batch.height, batch.width), mode="bilinear", align_corners=False)[0, 0]
++            dc = torch.nn.functional.interpolate(dc[None, None].cuda(), size=(batch.height, batch.width), mode="bilinear", align_corners=False)[0, 0]
++            dmask2 = (dc > dense_conf_thr) & (dz > 0.05)
++            if dmask2.any():
++                dr2 = aux["depth"][0, ..., 0]
++                loss_depth = loss_depth + dense_w * (torch.abs(dr2[dmask2] - dz[dmask2]) / dz[dmask2]).mean()
++        if frame_id in depth_pts:
++            with torch.no_grad():
++                P = depth_pts[frame_id]
++                w2c0 = batch.w2c[0]; K0 = batch.intrinsic[0]
++                c = P @ w2c0[:3, :3].T + w2c0[:3, 3]
++                z = c[:, 2]
++                u = (K0[0, 0] * c[:, 0] / z + K0[0, 2]).round().long()
++                v = (K0[1, 1] * c[:, 1] / z + K0[1, 2]).round().long()
++                ok = (z > 0.05) & (u >= 0) & (u < batch.width) & (v >= 0) & (v < batch.height)
++                u, v, z = u[ok], v[ok], z[ok]
++                lin = v * batch.width + u
++                tgt = torch.full((batch.height * batch.width,), float("inf"), device=z.device)
++                tgt.scatter_reduce_(0, lin, z, reduce="amin")
++                dmask = torch.isfinite(tgt)
++            if dmask.any():
++                dr = aux["depth"][0].reshape(-1)
++                loss_depth = loss_depth + depth_w * (torch.abs(dr[dmask] - tgt[dmask]) / tgt[dmask]).mean()
+         if color_correctors is not None and it > color_correction_start:
+             cc = color_correctors
+             pred = cc(cams, pred_)
+@@ -161,6 +305,20 @@
+             pred = pred_
+         aux["means2d"].retain_grad()
+ 
++        # visibility-aware opacity decay (4C4D's core idea, ported rather than adopting their pipeline):
++        # with only six training views a 4DGS happily raises the opacity of primitives that memorise the
++        # training images, which reads as low error there and as broken geometry from the hidden cameras.
++        # Periodically nudging down the opacity of the Gaussians that were actually rasterised keeps that
++        # shortcut expensive; genuinely needed primitives are pushed back up by the next gradient steps, and
++        # anything that falls through the floor is recycled by the existing relocation pass.
++        if odecay > 0 and it > odecay_start and it % odecay_every == 0 and "gaussian_ids" in aux:
++            with torch.no_grad():
++                vis = aux["gaussian_ids"].reshape(-1).unique()
++                if vis.numel() > 0:
++                    o = gs.opacities.data[vis].sigmoid() * odecay
++                    gs.opacities.data[vis] = torch.logit(o.clamp(1e-6, 1 - 1e-6))
++                    postfix.update({"odecay": f"{vis.numel()}"})
++
+         gt = batch.rgb.float() / 255
+         zero = torch.zeros((), device=pred.device)
+         loss_l1 = loss_weights["l1"] * nn.functional.l1_loss(pred, gt)
+@@ -181,7 +339,10 @@
+             gs.opacities.sigmoid() * gs.temporal_opacity(t).detach()
+         )
+         loss_reg_scale = loss_weights["reg_scale"] * gs.scales.exp().mean()
+-        loss_reg = loss_reg_opacity + loss_reg_scale
++        loss_reg_duration = loss_weights["reg_duration"] * torch.mean(
++            (1 - gs.gate().detach()) * gs.temporal_scale()
++        )
++        loss_reg = loss_reg_opacity + loss_reg_scale + loss_reg_duration
+         loss_gate = loss_weights["gate"] * torch.mean(1 - gs.gate())
+         loss_color_correctors = (
+             loss_weights["color_correctors"] * color_correctors.regularize()
+@@ -222,6 +383,44 @@
+                 )
+             )
+ 
++        loss_pseudo = torch.zeros((), device=pred.device)
++        if pseudo_items and it >= pseudo_start and it % pseudo_every == 0:
++            if pseudo_sample_probs is not None:
++                idx = int(torch.multinomial(pseudo_sample_probs, 1, generator=pseudo_rng))
++            else:
++                idx = int(torch.randint(len(pseudo_items), (1,), generator=pseudo_rng))
++            pi = pseudo_items[idx]
++            ppred, _, _ = gs(t=pi["t"], w2c=pi["w2c"], intrinsic=pi["K"], shape=(pi["h"], pi["w"]),
++                             sh_degree=min(it // 1000, gs.sh_degree) if sh_degree_schedule else gs.sh_degree)
++            ptgt = pi["rgb"]
++            if pseudo_colorfit:
++                with torch.no_grad():  # per-image affine color fit target->render (removes global tone mismatch)
++                    sel = (pi["mask"].reshape(-1) > 0.5) if pi["mask"] is not None else slice(None)
++                    X = ptgt.reshape(-1, 3)[sel][::7]; Y = ppred.detach().reshape(-1, 3)[sel][::7]
++                    X1 = torch.cat([X, torch.ones_like(X[:, :1])], 1)
++                    if pseudo_colorfit == 2:  # per-channel gain+bias only (robust)
++                        A = torch.zeros(4, 3, device=X.device)
++                        for ch in range(3):
++                            xc = torch.stack([X[:, ch], torch.ones_like(X[:, ch])], 1)
++                            sol = torch.linalg.lstsq(xc, Y[:, ch:ch + 1]).solution[:, 0]
++                            A[ch, ch] = sol[0]; A[3, ch] = sol[1]
++                    else:
++                        A = torch.linalg.lstsq(X1, Y).solution  # 4x3
++                    A[:3] = pseudo_damp * A[:3] + (1 - pseudo_damp) * torch.eye(3, device=A.device); A[3] *= pseudo_damp  # damp toward identity
++                    ptgt = (torch.cat([ptgt.reshape(-1, 3), torch.ones_like(ptgt.reshape(-1, 3)[:, :1])], 1) @ A).reshape(ptgt.shape).clamp(0, 1)
++            if pi["mask"] is not None:  # supervise only unmasked (static background) pixels
++                pm = pi["mask"]
++                ppred_m = ppred * pm + ptgt.detach() * (1 - pm)
++            else:
++                ppred_m = ppred
++            if pseudo_pool > 1:
++                pp_ = nn.functional.avg_pool2d(chw(ppred_m), pseudo_pool); pt_ = nn.functional.avg_pool2d(chw(ptgt), pseudo_pool)
++            else:
++                pp_ = chw(ppred_m); pt_ = chw(ptgt)
++            loss_pseudo = pseudo_w * (0.8 * nn.functional.l1_loss(pp_, pt_) + 0.2 * (1 - fused_ssim(pp_, pt_, padding="valid")))
++            if pseudo_lpips_fn is not None:
++                loss_pseudo = loss_pseudo + pseudo_lpips_w * pseudo_lpips_fn(chw(ppred_m.clamp(0, 1)), chw(ptgt))
++                pseudo_lpips_fn.reset()
+         loss = (
+             loss_l1
+             + loss_ssim
+@@ -230,11 +429,85 @@
+             + loss_gate
+             + loss_color_correctors
+             + loss_velocity_distill
++            + loss_depth
++            + loss_pseudo
+         )
+ 
++        loss_unseen = torch.zeros((), device=pred_.device)
++        if unseen_pool is not None and it > unseen_start and it % unseen_every == 0:
++            c2ws, Ks = unseen_pool
++            n = len(c2ws)
++            i0, i1 = torch.randint(0, n, (2,), device=c2ws.device).tolist()
++            if i0 == i1: i1 = (i1 + 1) % n
++            alpha = float(torch.rand(1)) * 1.6 - 0.3   # interpolate and mildly extrapolate
++            A, B = c2ws[i0], c2ws[i1]
++            Rn = A[:3, :3] + alpha * (B[:3, :3] - A[:3, :3])
++            U, _, Vh = torch.linalg.svd(Rn.double()); Rn = (U @ Vh).float()
++            if torch.det(Rn) < 0: Rn = -Rn
++            tn_ = A[:3, 3] + alpha * (B[:3, 3] - A[:3, 3])
++            c2w_n = torch.eye(4, device=c2ws.device); c2w_n[:3, :3] = Rn; c2w_n[:3, 3] = tn_
++            w2c_n = torch.inverse(c2w_n)[None]
++            Kn = Ks[i0].clone()
++            ph = min(unseen_patch, int(batch.height)); pw = min(unseen_patch, int(batch.width))
++            oy = int(torch.randint(0, max(1, int(batch.height) - ph), (1,))); ox = int(torch.randint(0, max(1, int(batch.width) - pw), (1,)))
++            Kp = Kn.clone(); Kp[0, 2] -= ox; Kp[1, 2] -= oy
++            u_img, _, u_meta = gs(t=t, w2c=w2c_n, intrinsic=Kp[None], shape=(ph, pw), clamp=False, render_depth=True)
++            ud = u_meta["depth"][0, ..., 0]
++            dx = torch.abs(ud[:, 1:] - ud[:, :-1]); dy = torch.abs(ud[1:] - ud[:-1])
++            scale_d = ud.detach().clamp(min=0.1)
++            loss_unseen = unseen_w * ((dx / scale_d[:, 1:]).mean() + (dy / scale_d[1:]).mean())
++            loss = loss + loss_unseen
++            postfix.update({"unseen": f"{float(loss_unseen.detach()):.4f}"})
++
++        loss_fg = torch.zeros((), device=pred.device)
++        loss_sil = torch.zeros((), device=pred.device)
++        if fg_seg_model is not None:
++            with torch.no_grad():
++                gt_chw = chw(gt)
++                seg_in = ((gt_chw - fg_mean) / fg_std).half()
++                person = fg_seg_model(seg_in)["out"].float().argmax(1) == 15  # NCHW logits -> person class
++                if fg_dilate > 0:
++                    person = torch.nn.functional.max_pool2d(person.float()[:, None], fg_dilate * 2 + 1, stride=1, padding=fg_dilate) > 0
++                    person = person[:, 0]
++                fg_mask = person[..., None].float()  # NHW1
++            if fg_weight > 0 and fg_mask.mean() > 1e-4:
++                loss_fg = fg_weight * (
++                    nn.functional.l1_loss(pred * fg_mask, gt * fg_mask)
++                    + 0.2 * (1 - fused_ssim(chw(pred * fg_mask), chw(gt * fg_mask), padding="valid"))
++                )
++            loss = loss + loss_fg
++            # silhouette: push the renderer's own accumulated alpha toward the segmentation mask. The rasterizer
++            # already computes this alpha for free; it was previously discarded (`pred_, _, aux = gs(...)`).
++            # This penalises Gaussians that make the person edge translucent to cheat photometric loss, which is
++            # a distinct failure mode from just up-weighting FG appearance error (FTGSPP_FG_WEIGHT).
++            if sil_weight > 0:
++                a = pred_alpha.clamp(1e-4, 1 - 1e-4)
++                bce = -(fg_mask * a.log() + (1 - fg_mask) * (1 - a).log()).mean()
++                inter = (a * fg_mask).sum(); dice = 1 - (2 * inter + 1) / (a.sum() + fg_mask.sum() + 1)
++                loss_sil = sil_weight * (bce + dice)
++                loss = loss + loss_sil
++            postfix.update({"fg": f"{float(loss_fg.detach()):.4f}", "sil": f"{float(loss_sil.detach()):.4f}"})
++
+         loss.backward()
+ 
+         optimizers.step()
++        carve_every = int(os.environ.get("FTGSPP_CARVE_EVERY", "0"))
++        if carve_every > 0 and dense_tgt is not None and it % carve_every == 0 and it > int(os.environ.get("FTGSPP_CARVE_START", "1000")):
++            with torch.no_grad():
++                cm = float(os.environ.get("FTGSPP_CARVE_MARGIN", "0.15")); dz0, dc0 = dense_tgt
++                dz0 = dz0.cuda(); dc0 = dc0.cuda(); hh, ww = dz0.shape
++                w2c0 = batch.w2c[0]; K0 = batch.intrinsic[0]
++                mt = gs.means_t(t); c = mt @ w2c0[:3, :3].T + w2c0[:3, 3]; z = c[:, 2]
++                u = (K0[0, 0] * c[:, 0] / z + K0[0, 2]) * (ww / batch.width); v = (K0[1, 1] * c[:, 1] / z + K0[1, 2]) * (hh / batch.height)
++                ui = u.round().long(); vi = v.round().long()
++                ok = (z > 0.05) & (ui >= 0) & (ui < ww) & (vi >= 0) & (vi < hh)
++                act = (gs.temporal_opacity(t).squeeze(-1) > 0.5) & ok
++                idx = act.nonzero(as_tuple=True)[0]
++                d = dz0[vi[idx], ui[idx]]; cf = dc0[vi[idx], ui[idx]]
++                bad = idx[(cf > dense_conf_thr) & (z[idx] < (1 - cm) * d)]
++                if len(bad) > 0:
++                    gs.opacities.data[bad] = -8.0  # sigmoid ~ 3e-4 -> will be relocated as dead
++                postfix.update({"carved": f"{len(bad)}"})
+         schedulers.step()
+         optimizers.zero_grad()
+ 
+@@ -335,9 +608,12 @@
+             "loss/reg": float(loss_reg.detach()),
+             "loss/reg_opacity": float(loss_reg_opacity.detach()),
+             "loss/reg_scale": float(loss_reg_scale.detach()),
++            "loss/reg_duration": float(loss_reg_duration.detach()),
+             "loss/gate": float(loss_gate.detach()),
+             "loss/color_correctors": float(loss_color_correctors.detach()),
+             "loss/velocity_distill": float(loss_velocity_distill.detach()),
++            "loss/depth": float(loss_depth.detach()),
++            "loss/unseen": float(loss_unseen.detach()),
+         }
+         for tag, value in loss_scalars.items():
+             tb_writer.add_scalar(tag, value, it)

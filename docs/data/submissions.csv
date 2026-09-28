@@ -1,0 +1,59 @@
+idx,file,date_utc,change,psnr,ssim,lpips,fg_psnr,fg_ssim,fg_lpips
+1,baseline_submission,09-03,"stock FreeTimeGS++, 30k iterations",22.9251,0.90516,0.27468,,,
+2,F_s0,09-03,"+ colour correction, LPIPS loss, sparse depth, opacity reg, near-camera cull",23.4307,0.90894,0.26021,,,
+3,F_ens3,09-03,3-seed render ensemble,24.5169,0.92075,0.24353,,,
+4,slotcheck,09-04,"+ dense VGGT depth (recipe J), 2 seeds",24.851,0.92143,0.23921,,,
+5,submit_now,09-04,LPIPS weight 0.15 + SEVA pseudo-view members (P8/P9),25.0302,0.92408,0.23815,,,
+6,bestmix_sharp,09-04,per-scene best source + unsharp mask,25.1986,0.9208,0.23373,,,
+7,s03ppj,09-05,4-member ensemble S03+P8+P9+J (LPIPS weight 0.3),25.521,0.92642,0.2357,,,
+8,difixA_all,09-06,"+ Difix3D+ (reference-guided, t=199), blend a~0.5",26.02,0.91813,0.18705,,,
+9,difixD_all,09-06,lighter per-view Difix blend (a~0.3),25.8871,0.92297,0.2004,24.3456,0.83804,0.31322
+10,difixD_t100_all,09-06,Difix at t=100,25.8983,0.92538,0.21875,24.4727,0.84133,0.35435
+11,bbox_in30_out55,09-07,bbox-protected Difix blend (failed),25.9921,0.9176,0.19215,24.451,0.84104,0.35146
+12,pb_p50_b45,09-08,person/background-decoupled Difix strength,25.9436,0.91855,0.18649,24.2482,0.83247,0.27716
+13,six_p50_b45,09-09,"6-member ensemble incl. full-res, gating, 4M-Gaussian members",26.1365,0.91977,0.18907,24.1259,0.83049,0.2807
+14,SIXTTA_p50_b45,09-11,+ Difix 3-shift test-time augmentation,26.1726,0.92203,0.19157,24.2726,0.83555,0.28581
+15,NINE_p50_b45,09-11,9-member ensemble (weaker members diluted it),25.9757,0.92129,0.19568,24.1478,0.83358,0.2945
+16,SIX_p070_bpAVt15,09-12,+ perceptual projection of the background,26.0309,0.92066,0.18312,24.2483,0.83203,0.26493
+17,FGP8L20_p050,09-12,person region from two FG-specialist models,26.0361,0.92178,0.18524,24.5557,0.8379,0.28055
+18,FGE_p085,09-13,person = 5-model FG-specialist ensemble,26.072,0.92038,0.1817,24.4169,0.82711,0.24382
+19,FGE6_p085,09-13,person = 6-model FG ensemble,26.0861,0.92053,0.18125,24.4921,0.82914,0.23779
+20,FGE6P_p085,09-13,+ projection on the person (failed),26.0478,0.91997,0.18348,24.2435,0.82064,0.26877
+21,FGEP_p085,09-13,person = 5 seeds of one config,26.0833,0.92009,0.18091,24.418,0.8225,0.23295
+22,FGE8_p085,09-14,person = 8-model FG ensemble,26.0911,0.92056,0.18108,24.5471,0.82992,0.23541
+23,S5E_p085,09-14,person models with stride-5 keyframes,26.1111,0.92083,0.18088,24.7808,0.83414,0.23225
+24,S6E_p085,09-14,6 stride-5 seeds,26.1137,0.92085,0.18077,24.8088,0.83496,0.23061
+25,HB3_p070_six,09-15,"person = half stride-5, half diverse mix (alpha 0.70)",26.1246,0.92133,0.18193,24.9408,0.84204,0.24771
+26,HB3_p085_six,09-15,"same, alpha 0.85",26.1219,0.92123,0.18123,24.8984,0.84055,0.23739
+27,HB3_p085_nbx15s,09-15,+ cross-target projected background,26.3235,0.92184,0.1815,25.0286,0.84144,0.23441
+28,HB3_p085_nbx15_f101s4,09-15,+ wider composite feather,26.3254,0.92175,0.18143,25.048,0.84138,0.23492
+29,C0_hb3_nbx15_f101,09-15,feather 101 on the projected background,26.3519,0.92234,0.18097,25.1525,0.84345,0.23424
+30,C1_hb3_tp15_f101,09-15,background projected toward the 6-member Difix-TTA target,26.35,0.92183,0.1814,25.2347,0.84387,0.23188
+31,C2_hb3_bp4_f101,09-15,background mix variant bp4,26.3329,0.92208,0.18113,25.1923,0.8437,0.23349
+32,C3_hb3_tp15_f131,09-15,feather 131,26.3514,0.92186,0.18152,25.2412,0.84429,0.23346
+33,C4_hb3_bp4_f81,09-15,feather 81,26.3312,0.92205,0.18106,25.1858,0.84335,0.23246
+34,C1_011a095,09-15,stronger Difix on scene 011 only,26.3509,0.92185,0.1813,25.2405,0.84406,0.23052
+35,C6_colorfix,09-16,"additive per-camera colour prior on 007/011 (PSNR up, SSIM down)",27.2079,0.92107,0.1817,25.4277,0.84029,0.23208
+36,C5_hb3v2_tp15_f101,09-16,+ full-res 4M-Gaussian SEVA member,26.35,0.9218,0.1814,25.2366,0.8439,0.2322
+37,C8_cc2,09-16,"colour correction in fixed forms: taper (011), gain (007)",27.1073,0.9228,0.1813,25.455,0.8468,0.2306
+38,S1_splice,09-16,exact per-scene splice of scored packages,26.4315,0.9223,0.1812,25.257,0.8443,0.2323
+39,C13,09-16,9-seed person ensemble + colour fix,27.1016,0.9227,0.1813,25.5605,0.8487,0.2299
+40,C12_patcam,09-16,colour pattern on shared cameras of 004/006/009,27.1024,0.9219,0.1824,25.3167,0.8435,0.2313
+41,C9_hb3v4_tp15_f101,09-16,"9-seed person ensemble, no colour fix",26.3583,0.922,0.1814,25.3306,0.846,0.2318
+42,C25_a090,09-16,person Difix alpha 0.90,27.0904,0.9225,0.1811,25.4468,0.8462,0.227
+43,C24_meta,09-16,pixel average of scored packages,27.0314,0.9232,0.1857,25.5076,0.8499,0.2391
+44,C29_q92,09-16,JPEG quality 92 (failed),27.0694,0.9183,0.1971,25.4543,0.8447,0.2334
+45,C28_ba090,09-16,background alpha 0.90,27.0712,0.9228,0.1843,25.4797,0.8468,0.2301
+46,C25_a095,09-16,person Difix alpha 0.95,27.0891,0.9225,0.1809,25.4254,0.8456,0.2243
+47,C16,09-16,person = 6 new stride-5 x pseudo-view models,27.1159,0.9229,0.1811,25.6965,0.851,0.2267
+48,C27_b100,09-16,pure temporal background plate (failed: mask mismatch),26.6234,0.9284,0.2229,22.5538,0.8208,0.291
+49,C19_a095,09-16,C16 with alpha 0.95,27.1128,0.9227,0.1807,25.6457,0.8495,0.2212
+50,C23_6shift,09-16,6-shift Difix TTA,27.1176,0.9229,0.1811,25.7076,0.8517,0.2268
+51,C22,09-16,new models also in the diverse branch,27.1218,0.9229,0.181,25.7361,0.8512,0.2252
+52,C18,09-16,50/50 old vs new person models,27.1057,0.9227,0.1812,25.6005,0.8497,0.2284
+53,C14_hb3v5_tp15_f101,09-16,"wider person ensemble, no colour fix",26.3587,0.922,0.1814,25.3371,0.8461,0.2315
+54,C26_a085,09-16,second Difix pass,27.1036,0.9222,0.1809,25.4999,0.8423,0.2246
+55,C35_p22_both,09-17,C22 person + new projected background + safe temporal plate,27.043,0.9286,0.209,25.7777,0.8511,0.2228
+56,C38_silod,09-17,silhouette loss + opacity decay models (failed),26.7698,0.921,0.1822,23.6517,0.8214,0.2438
+57,S3_recovery,09-17,exact per-scene splice (recovery after C38),27.1297,0.9239,0.1869,25.5637,0.8468,0.2225
+58,C43_011b,09-17,C35 + 15-member person ensemble for scene 011 (final),27.0411,0.9287,0.2091,25.7787,0.8517,0.2239

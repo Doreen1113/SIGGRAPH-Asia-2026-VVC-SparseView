@@ -1,0 +1,32 @@
+--- a/ftgspp/models/gaussians.py
++++ b/ftgspp/models/gaussians.py
+@@ -5,6 +5,7 @@
+ from typing import Optional, Self
+ 
+ import gsplat
++import os
+ import torch
+ from torch import Tensor, nn
+ 
+@@ -107,6 +108,7 @@
+         shape: tuple[int, int],
+         clamp: bool = True,
+         sh_degree: Optional[int] = None,
++        render_depth: bool = False,
+     ):
+         if not isinstance(t, Tensor):
+             t = torch.tensor(t).to(self.means)
+@@ -129,7 +131,13 @@
+             sh_degree=sh_degree,
+             width=shape[1],
+             height=shape[0],
++            render_mode="RGB+ED" if render_depth else "RGB",
++            eps2d=float(os.environ.get("FTGSPP_EPS2D", "0.3")),
++            rasterize_mode=os.environ.get("FTGSPP_RASTER_MODE", "classic"),
+         )
++        if render_depth:
++            meta["depth"] = image[..., 3:4]
++            image = image[..., :3]
+         if "gaussian_ids" in meta:
+             meta["gaussian_ids"] = active_ids[meta["gaussian_ids"]]
+         if clamp:

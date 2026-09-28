@@ -1,0 +1,3 @@
+FGW40_L90K 001_1_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=90000
+FGW80_L60K 001_1_seq0 FTGSPP_FG_WEIGHT=8.0 data.scale=1.0 train.iterations=60000
+FGW40_L60K_s1 001_1_seq0 FTGSPP_FG_WEIGHT=4.0 data.scale=1.0 train.iterations=60000 train.seed=1

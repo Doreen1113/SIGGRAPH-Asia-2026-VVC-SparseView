@@ -1,0 +1,1 @@
+GATE_FR_s0 009_0_seq0 data.scale=1.0 model.marginal_gating=true

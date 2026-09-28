@@ -1,0 +1,9 @@
+# Dataset-derived images: the challenge licence forbids redistribution (see README, "Dataset licence")
+docs/qualitative/
+
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+*.zip
+*.log

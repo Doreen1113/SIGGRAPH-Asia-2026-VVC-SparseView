@@ -1,0 +1,6 @@
+G4M_FR_s0 004_1_seq0 data.scale=1.0 init.num_gaussians=4000000
+G4M_FR_s0 006_1_seq0 data.scale=1.0 init.num_gaussians=4000000
+G4M_FR_s0 007_0_seq0 data.scale=1.0 init.num_gaussians=4000000
+G4M_FR_s0 009_0_seq0 data.scale=1.0 init.num_gaussians=4000000
+G4M_FR_s0 011_0_seq0 data.scale=1.0 init.num_gaussians=4000000
+FULLRES_s1 011_0_seq0 data.scale=1.0 train.seed=1

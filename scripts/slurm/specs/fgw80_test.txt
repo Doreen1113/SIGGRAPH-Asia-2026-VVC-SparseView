@@ -1,0 +1,5 @@
+FGW80_s0 004_1_seq0 FTGSPP_FG_WEIGHT=8.0 data.scale=1.0
+FGW80_s0 006_1_seq0 FTGSPP_FG_WEIGHT=8.0 data.scale=1.0
+FGW80_s0 007_0_seq0 FTGSPP_FG_WEIGHT=8.0 data.scale=1.0
+FGW80_s0 009_0_seq0 FTGSPP_FG_WEIGHT=8.0 data.scale=1.0
+FGW80_s0 011_0_seq0 FTGSPP_FG_WEIGHT=8.0 data.scale=1.0

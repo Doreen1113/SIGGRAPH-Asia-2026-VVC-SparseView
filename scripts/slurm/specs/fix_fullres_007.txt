@@ -1,0 +1,1 @@
+FULLRES_s1 007_0_seq0 data.scale=1.0 train.seed=1

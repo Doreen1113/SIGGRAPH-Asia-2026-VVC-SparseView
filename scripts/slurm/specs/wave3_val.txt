@@ -1,0 +1,6 @@
+FGW05_s0 001_1_seq0 FTGSPP_FG_WEIGHT=0.5 data.scale=1.0
+FGW10_s0 001_1_seq0 FTGSPP_FG_WEIGHT=1.0 data.scale=1.0
+FGW20_s0 001_1_seq0 FTGSPP_FG_WEIGHT=2.0 data.scale=1.0
+G8M_FR_s0 001_1_seq0 data.scale=1.0 init.num_gaussians=8000000
+LONG60K_s0 001_1_seq0 data.scale=1.0 train.iterations=60000
+FGW10_G8M 001_1_seq0 FTGSPP_FG_WEIGHT=1.0 data.scale=1.0 init.num_gaussians=8000000

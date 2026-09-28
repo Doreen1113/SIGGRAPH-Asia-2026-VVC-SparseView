@@ -1,0 +1,20 @@
+points_path: ${run.experiment_root}/points_stride${init.keyframe_stride}
+keyframe_stride: 10
+num_points_per_frame: 108000
+num_gaussians: 2000000
+num_velocity_nns: 0
+sh_degree: 3
+opacity: 0.1
+scale: 0.1
+temporal_motion_adapted: false
+temporal_flow_path: _flow
+temporal_covis_thresh: 0.3
+
+roma:
+  model: outdoor
+  upsample_preds: true
+  symmetric: false
+  backend: v2
+  threshold: 0.25
+  num_workers: 4
+  prefetch_factor: 1
