@@ -203,8 +203,7 @@ Each of these was measured, on validation and in most cases also on the test eva
 
 This repository contains code, configuration and results only. Checkpoints and renders (about 1 TB) are not
 included, and neither is the dataset (see below). Rebuilding the final submission means retraining on the
-order of a hundred per-scene models, each taking one to a few GPU-hours. Most of the work ran on NCHC Nano4
-nodes with 8 x H200.
+order of a hundred per-scene models.
 
 The scripts are the ones we ran, not a cleaned-up release. They contain absolute paths from our cluster.
 When reading them:
@@ -284,7 +283,7 @@ read the token from the `VVC_TOKEN` environment variable.
 ## Environment
 
 * FreeTimeGS++: Python 3.12, PyTorch 2.5.1 + CUDA 12.1, `gsplat==1.5.3`; see [ftgspp/README.md](ftgspp/README.md)
-  (`bash ftgspp/scripts/install_env.sh`). On H200 we used CUDA 12.6 and `TORCH_CUDA_ARCH_LIST=9.0`.
+  (`bash ftgspp/scripts/install_env.sh`).
 * Difix3D+ (weights `nvidia/difix_ref` on Hugging Face), installed with
   [scripts/setup_difix.sh](scripts/setup_difix.sh).
 * Stable Virtual Camera (SEVA), VGGT, torchvision DeepLabV3, `lpips`, OpenCV.

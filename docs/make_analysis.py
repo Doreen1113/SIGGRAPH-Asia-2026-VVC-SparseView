@@ -23,7 +23,7 @@ def theme(mode):
 
 
 def legend(ax, t, **kw):
-    leg = ax.legend(frameon=False, fontsize=9, **kw)
+    leg = ax.legend(frameon=False, fontsize=11.5, **kw)
     for txt in leg.get_texts():
         txt.set_color(t["text2"])
     return leg
@@ -55,7 +55,7 @@ STAGES = [
 def stage_gains(mode):
     t = theme(mode)
     cols = [("PSNR (dB)", 0, 1, 1), ("SSIM (x100)", 1, 1, 100), ("LPIPS decrease (x100)", 2, -1, 100)]
-    fig, axes = plt.subplots(1, 3, figsize=(13, 7.2), dpi=200, sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(10, 8.6), dpi=200, sharey=True)
     fig.patch.set_facecolor(t["surface"])
     y = np.arange(len(STAGES))[::-1]
     h = 0.36
@@ -71,16 +71,16 @@ def stage_gains(mode):
             fg.append(mult * sign * (rb[6 + k] - ra[6 + k]) if ra[6] is not None else np.nan)
         ax.barh(y + h / 2 + 0.02, full, height=h, color=t["s1"], label="Full image", zorder=3)
         ax.barh(y - h / 2 - 0.02, fg, height=h, color=t["s2"], label="Foreground", zorder=3)
-        ax.set_title(label, color=t["text"], fontsize=11, loc="left")
-        ax.tick_params(axis="x", labelsize=8.5)
+        ax.set_title(label, color=t["text"], fontsize=14.5, loc="left")
+        ax.tick_params(axis="x", labelsize=11)
         ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
-    axes[0].set_yticks(y, [s[0] for s in STAGES], fontsize=9, color=t["text2"])
+    axes[0].set_yticks(y, [s[0] for s in STAGES], fontsize=11.5, color=t["text2"])
     axes[0].tick_params(axis="y", colors=t["text2"])
     legend(axes[2], t, loc="lower right", ncol=1)
-    fig.suptitle("What each change did to the official score (right = better)", color=t["text"], fontsize=13,
+    fig.suptitle("What each change did to the official score (right = better)", color=t["text"], fontsize=17,
                  x=0.01, ha="left", y=0.99)
     fig.text(0.01, -0.02, "Each row compares two scored submissions that differ only in that change. "
-             "Foreground metrics were not reported before 6 Sept.", color=t["muted"], fontsize=8.5)
+             "Foreground metrics were not reported before 6 Sept.", color=t["muted"], fontsize=11)
     fig.tight_layout()
     save(fig, "stage_gains", mode, t)
 
@@ -97,7 +97,7 @@ PROJ = [("toward single-pass Difix", 0.1558, 0.9277), ("toward TTA, two LPIPS ne
 
 def difix_frontier(mode):
     t = theme(mode)
-    fig, ax = plt.subplots(figsize=(8.6, 5.6), dpi=200)
+    fig, ax = plt.subplots(figsize=(8.6, 6.4), dpi=200)
     fig.patch.set_facecolor(t["surface"])
     style(ax, t)
     ax.xaxis.grid(True, color=t["grid"], lw=1)
@@ -109,29 +109,29 @@ def difix_frontier(mode):
         ax.scatter(xs[1:], ys[1:], s=64, color=c, edgecolors=t["ring"], linewidths=2, zorder=3, label=lab)
     for a, x, y in SINGLE:
         if a in (0.30, 0.70, 1.00):
-            ax.text(x + 0.0012, y + 0.0006, f"a={a:.2f}", color=t["text2"], fontsize=8)
+            ax.text(x + 0.0012, y + 0.0006, f"a={a:.2f}", color=t["text2"], fontsize=10.5)
     ax.scatter([RAW[0]], [RAW[1]], s=90, facecolors=t["surface"], edgecolors=t["ink"], linewidths=2, zorder=4)
-    ax.text(RAW[0] - 0.0015, RAW[1] + 0.0009, "raw ensemble render", color=t["text2"], fontsize=8.5, ha="right")
+    ax.text(RAW[0] - 0.0015, RAW[1] + 0.0009, "raw ensemble render", color=t["text2"], fontsize=11, ha="right")
     for i, (lab, x, y) in enumerate(PROJ):
         ax.scatter([x], [y], s=80, marker="D", color=t["ink"], edgecolors=t["ring"], linewidths=1.5, zorder=4,
                    label="perceptual projection" if i == 0 else None)
     x0, y0 = PROJ[0][1], PROJ[0][2]
-    ax.annotate("projection toward\nsingle-pass Difix", (x0, y0), xytext=(0.1470, 0.9322), fontsize=8.5,
+    ax.annotate("projection toward\nsingle-pass Difix", (x0, y0), xytext=(0.1470, 0.9322), fontsize=11,
                 color=t["text2"], arrowprops=dict(arrowstyle="-", color=t["muted"], lw=0.8))
     x, y = PROJ[1][1], PROJ[1][2]
     ax.scatter([x], [y], s=380, facecolors="none", edgecolors=t["ink"], linewidths=1.5, zorder=5)
     ax.annotate("used in the submission:\nprojection toward the TTA output,\nAlexNet + VGG LPIPS", (x, y),
-                xytext=(0.170, 0.9150), fontsize=9, color=t["text"],
+                xytext=(0.170, 0.9150), fontsize=11.5, color=t["text"],
                 arrowprops=dict(arrowstyle="-", color=t["muted"], lw=0.8))
-    ax.set_xlabel("LPIPS (AlexNet), lower is better", color=t["text2"], fontsize=10)
-    ax.set_ylabel("SSIM, higher is better", color=t["text2"], fontsize=10)
+    ax.set_xlabel("LPIPS (AlexNet), lower is better", color=t["text2"], fontsize=13)
+    ax.set_ylabel("SSIM, higher is better", color=t["text2"], fontsize=13)
     ax.set_xlim(0.145, 0.222)
     ax.set_ylim(0.9060, 0.9345)
     ax.set_title("Difix strength trades SSIM for LPIPS; TTA and projection move the frontier",
-                 color=t["text"], fontsize=12, loc="left", pad=12)
+                 color=t["text"], fontsize=15.5, loc="left", pad=12)
     legend(ax, t, loc="lower right", bbox_to_anchor=(1.0, 0.0))
     fig.text(0.01, -0.01, "Validation scene 001_1, native 4K, full image. Lines start at the raw render and follow "
-             "the blend weight a toward the restored image.", color=t["muted"], fontsize=8.5)
+             "the blend weight a toward the restored image.", color=t["muted"], fontsize=11)
     save(fig, "difix_frontier", mode, t)
 
 
@@ -153,7 +153,7 @@ ENSEMBLE_PTS = [
 
 def ensemble_plane(mode):
     t = theme(mode)
-    fig, ax = plt.subplots(figsize=(8.6, 5.4), dpi=200)
+    fig, ax = plt.subplots(figsize=(8.6, 6.2), dpi=200)
     fig.patch.set_facecolor(t["surface"])
     style(ax, t)
     ax.xaxis.grid(True, color=t["grid"], lw=1)
@@ -162,23 +162,23 @@ def ensemble_plane(mode):
     ax.plot(xs, ys, color=t["grid"], lw=2, zorder=1)
     ax.scatter(xs, ys, s=70, color=t["s2"], edgecolors=t["ring"], linewidths=2, zorder=3)
     for (n, lab, off), x, y in zip(ENSEMBLE_PTS, xs, ys):
-        ax.annotate(lab, (x, y), xytext=off, textcoords="offset points", fontsize=8.5, color=t["text2"],
+        ax.annotate(lab, (x, y), xytext=off, textcoords="offset points", fontsize=11, color=t["text2"],
                     ha="left" if off[0] > 0 else "right")
     ax.annotate("", xy=(0.2445, 0.8412), xytext=(0.2445, 0.8285),
                 arrowprops=dict(arrowstyle="-|>", color=t["muted"], lw=1.2))
-    ax.text(0.2452, 0.8348, "more diverse\nmembers:\nSSIM up", color=t["muted"], fontsize=8.5, va="center")
+    ax.text(0.2452, 0.8348, "more diverse\nmembers:\nSSIM up", color=t["muted"], fontsize=11, va="center")
     ax.annotate("", xy=(0.2440, 0.8222), xytext=(0.2540, 0.8222),
                 arrowprops=dict(arrowstyle="-|>", color=t["muted"], lw=1.2))
-    ax.text(0.2490, 0.8229, "more seeds of one config:\nLPIPS down", color=t["muted"], fontsize=8.5,
+    ax.text(0.2490, 0.8229, "more seeds of one config:\nLPIPS down", color=t["muted"], fontsize=11,
             ha="center", va="bottom")
     ax.set_ylim(0.8195, 0.8540)
-    ax.set_xlabel("foreground LPIPS, lower is better", color=t["text2"], fontsize=10)
-    ax.set_ylabel("foreground SSIM, higher is better", color=t["text2"], fontsize=10)
+    ax.set_xlabel("foreground LPIPS, lower is better", color=t["text2"], fontsize=13)
+    ax.set_ylabel("foreground SSIM, higher is better", color=t["text2"], fontsize=13)
     ax.invert_xaxis()
-    ax.set_title("Choosing the person source: official foreground scores", color=t["text"], fontsize=12,
+    ax.set_title("Choosing the person source: official foreground scores", color=t["text"], fontsize=15.5,
                  loc="left", pad=12)
     fig.text(0.01, -0.01, "Each point is a scored submission; the line follows upload order. Better is up and "
-             "to the right.", color=t["muted"], fontsize=8.5)
+             "to the right.", color=t["muted"], fontsize=11)
     save(fig, "ensemble_plane", mode, t)
 
 
@@ -215,7 +215,7 @@ def blank(ax, t):
 # 4. Coverage-masked pseudo-views
 def pseudo_views(mode):
     t = theme(mode)
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(12.5, 4.9), dpi=200, gridspec_kw=dict(width_ratios=[1.05, 1]))
+    fig, (a1, a2) = plt.subplots(2, 1, figsize=(9, 9.0), dpi=200, gridspec_kw=dict(height_ratios=[1.15, 1]))
     fig.patch.set_facecolor(t["surface"])
     blank(a1, t)
     a1.set_aspect("equal")
@@ -230,13 +230,13 @@ def pseudo_views(mode):
     a1.imshow(img, extent=(0, W, 0, H), origin="lower", zorder=1, interpolation="bilinear")
     a1.add_patch(Rectangle((0, 0), W, H, fc="none", ec=t["edge"], lw=1, zorder=2))
     person(a1, 8.2, 1.0, 3.4, t["ink"], z=3)
-    a1.text(3.4, 3.2, "covered by at least one\ntraining camera:\npseudo-view loss off", color=t["text"],
-            fontsize=9, ha="center", va="center", zorder=4)
-    a1.text(14.4, 4.5, "seen by no\ntraining\ncamera:\nloss on", color=t["surface"], fontsize=9, ha="center",
+    a1.text(4.0, 4.3, "covered by a\ntraining camera:\nloss off", color=t["text"],
+            fontsize=11.5, ha="center", va="center", zorder=4)
+    a1.text(14.4, 4.5, "seen by no\ntraining\ncamera:\nloss on", color=t["surface"], fontsize=11.5, ha="center",
             va="center", zorder=4, fontweight="bold")
     a1.set_xlim(-0.2, W + 0.2)
     a1.set_ylim(-0.2, H + 0.2)
-    a1.set_title("Coverage mask of one hidden view (schematic)", color=t["text"], fontsize=11, loc="left")
+    a1.set_title("One hidden view: where the pseudo-view loss applies (schematic)", color=t["text"], fontsize=14.5, loc="left")
     # right: validation results
     style(a2, t)
     rows = [("baseline recipe F", 24.565, "ink"), ("F + pseudo-views, all pixels", 23.614, "ink"),
@@ -248,14 +248,17 @@ def pseudo_views(mode):
     for (lab, v, c), y in zip(rows, yy):
         a2.plot([23.3, v], [y, y], color=t["grid"], lw=2, zorder=1)
         a2.scatter([v], [y], s=80, color=t[c], edgecolors=t["ring"], linewidths=2, zorder=3)
-        a2.text(v + 0.05, y + 0.18, f"{v:.2f}", color=t["text"], fontsize=9)
-    a2.set_yticks(yy, [r[0] for r in rows], color=t["text2"], fontsize=9)
+        a2.text(v + 0.05, y + 0.18, f"{v:.2f}", color=t["text"], fontsize=11.5)
+    a2.set_yticks(yy, [r[0] for r in rows], color=t["text2"], fontsize=11.5)
     a2.tick_params(axis="y", colors=t["text2"])
     a2.set_xlim(23.3, 26.2)
     a2.set_ylim(-0.6, len(rows) - 0.3)
-    a2.set_xlabel("PSNR on validation scene 001_1 (dB)", color=t["text2"], fontsize=10)
-    a2.set_title("Masking turns a loss into a gain", color=t["text"], fontsize=11, loc="left")
-    fig.tight_layout(w_pad=3)
+    a2.set_xlabel("PSNR on scene 001_1 (dB)", color=t["text2"], fontsize=13)
+    a2.set_title("Masking turns a loss into a gain (validation PSNR)", color=t["text"], fontsize=14.5, loc="left")
+    fig.tight_layout(h_pad=2.5)
+    pos = a1.get_position()
+    a1.set_anchor("C")
+    a1.set_position([0.04, pos.y0, 0.92, pos.height])
     save(fig, "pseudo_views", mode, t)
 
 
@@ -263,11 +266,10 @@ def pseudo_views(mode):
 # 5. Static background plate
 def static_plate(mode):
     t = theme(mode)
-    fig = plt.figure(figsize=(12.5, 4.6), dpi=200)
+    fig = plt.figure(figsize=(9, 8.2), dpi=200)
     fig.patch.set_facecolor(t["surface"])
-    gs = fig.add_gridspec(1, 3, width_ratios=[1, 1, 1.05], wspace=0.25)
-    titles = ["Unsafe (C27): plate everywhere\nexcept this frame's mask",
-              "Safe (C35): plate only outside the\nunion of every frame's mask"]
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.05], hspace=0.45, wspace=0.12)
+    titles = ["Unsafe (C27)\nplate outside this frame's mask", "Safe (C35)\nplate outside every frame's mask"]
     frames = [(-1.6, 0.0), (-0.7, 0.6), (0.4, -0.2), (1.3, 0.4)]
     for k in range(2):
         ax = fig.add_subplot(gs[0, k])
@@ -289,10 +291,10 @@ def static_plate(mode):
                                  ls="--", zorder=4))
         ax.set_xlim(-3.3, 3.3)
         ax.set_ylim(-1.9, 1.9)
-        ax.set_title(titles[k], color=t["text"], fontsize=10, loc="left")
-    fig.text(0.125, 0.08, "tinted: temporal mean of the view   untinted: per-frame render kept   "
-             "grey: the person in other frames", color=t["muted"], fontsize=8.5)
-    ax = fig.add_subplot(gs[0, 2])
+        ax.set_title(titles[k], color=t["text"], fontsize=13, loc="left")
+    fig.text(0.125, 0.515, "tinted: temporal mean of the view    untinted: per-frame render kept    "
+             "grey: the person in other frames", color=t["muted"], fontsize=11)
+    ax = fig.add_subplot(gs[1, :])
     style(ax, t)
     ax.yaxis.grid(False)
     ax.xaxis.grid(True, color=t["grid"], lw=1)
@@ -304,10 +306,10 @@ def static_plate(mode):
     y = np.arange(3)[::-1]
     ax.barh(y + 0.19, [u * s for u, s in zip(unsafe, scale)], height=0.34, color=t["muted"], label="unsafe (C27)")
     ax.barh(y - 0.19, [u * s for u, s in zip(safe, scale)], height=0.34, color=t["s1"], label="safe (C35)")
-    ax.set_yticks(y, labels, color=t["text2"], fontsize=9)
+    ax.set_yticks(y, labels, color=t["text2"], fontsize=11.5)
     ax.tick_params(axis="y", colors=t["text2"])
-    ax.set_title("Official change vs. the same package without it", color=t["text"], fontsize=10, loc="left")
-    legend(ax, t, loc="lower left")
+    ax.set_title("Official change vs. the same package without it", color=t["text"], fontsize=13, loc="left")
+    legend(ax, t, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=2)
     save(fig, "static_plate", mode, t)
 
 
@@ -315,7 +317,7 @@ def static_plate(mode):
 # 6. Colour correction for hidden cameras
 def colour(mode):
     t = theme(mode)
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 4.4), dpi=200)
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4.8), dpi=200)
     fig.patch.set_facecolor(t["surface"])
     style(a1, t)
     a1.xaxis.grid(True, color=t["grid"], lw=1)
@@ -327,10 +329,10 @@ def colour(mode):
     a1.plot(x, np.clip(x * g, 0, 1), color=t["s1"], lw=2, label="gain, used on 007")
     a1.set_xlim(0, 0.4)
     a1.set_ylim(0, 0.46)
-    a1.set_xlabel("input intensity (dark end)", color=t["text2"], fontsize=10)
-    a1.set_ylabel("corrected intensity", color=t["text2"], fontsize=10)
-    a1.set_title("Three ways to apply the same camera offset (illustrative parameters)", color=t["text"],
-                 fontsize=10.5, loc="left")
+    a1.set_xlabel("input intensity, dark end (illustrative)", color=t["text2"], fontsize=13)
+    a1.set_ylabel("corrected intensity", color=t["text2"], fontsize=13)
+    a1.set_title("Three ways to apply a camera offset", color=t["text"],
+                 fontsize=13.5, loc="left")
     legend(a1, t, loc="upper left")
     style(a2, t)
     bins = ["0-0.10", "0.10-0.25", "0.25-0.50"]
@@ -339,12 +341,12 @@ def colour(mode):
     a2.bar(range(3), vals, width=0.5, color=t["muted"], zorder=3)
     for i, v in enumerate(vals):
         a2.text(i, v + (0.002 if v >= 0 else -0.002), f"{v:+.3f}" if v else "0.000", ha="center", va="bottom" if v >= 0 else "top",
-                color=t["text"], fontsize=9)
+                color=t["text"], fontsize=11.5)
     a2.set_xticks(range(3), bins)
     a2.set_ylim(-0.05, 0.012)
-    a2.set_xlabel("mean intensity of the SSIM window", color=t["text2"], fontsize=10)
-    a2.set_ylabel("SSIM change", color=t["text2"], fontsize=10)
-    a2.set_title("Additive offset: SSIM loss sits in dark windows (validation)", color=t["text"], fontsize=10.5,
+    a2.set_xlabel("mean intensity of the SSIM window (validation)", color=t["text2"], fontsize=13)
+    a2.set_ylabel("SSIM change", color=t["text2"], fontsize=13)
+    a2.set_title("Additive offset: SSIM change by brightness", color=t["text"], fontsize=13.5,
                  loc="left")
     fig.tight_layout(w_pad=3)
     save(fig, "colour", mode, t)

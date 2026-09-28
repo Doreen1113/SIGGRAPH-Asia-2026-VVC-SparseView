@@ -10,16 +10,15 @@ from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Rectangle, Ellip
 from make_figures import FIG
 from make_analysis import theme, person, camera
 
-FW, FH = 17.0, 8.2                      # figure size in inches
+FW, FH = 12.0, 8.0                      # figure size in inches; GitHub shows it about 900 px wide
 COLS = [                                # header, x0, x1 (figure fraction)
-    ("input", 0.005, 0.125),
-    ("per-scene 4D Gaussians", 0.135, 0.330),
-    ("render + combine", 0.340, 0.520),
-    ("restore / clean", 0.530, 0.710),
-    ("merge", 0.720, 0.855),
-    ("submission", 0.865, 0.995),
+    ("input", 0.005, 0.150),
+    ("4D Gaussians", 0.160, 0.390),
+    ("combine", 0.400, 0.610),
+    ("restore / clean", 0.620, 0.830),
+    ("output", 0.840, 0.995),
 ]
-ROW_Y = {"top": 0.645, "bot": 0.205, "mid": 0.43}    # bottom of the drawing box
+ROW_Y = {"top": 0.665, "bot": 0.285, "mid": 0.47}    # bottom of the drawing box
 
 
 def frame(ax, t, fill=None):
@@ -74,8 +73,8 @@ def d_person_models(ax, t):
     for x in np.linspace(10.6, 15.0, 10):
         ax.plot([x, x], [1.3, 2.2], color=t["s2"], lw=2, solid_capstyle="round")
     ax.plot([10.2, 15.4], [1.3, 1.3], color=t["muted"], lw=1)
-    ax.text(12.8, 2.8, "keyframe every\n5 frames", color=t["text2"], fontsize=7.5, ha="center")
-    ax.text(12.8, 6.0, "6 to 15\nmodels", color=t["text2"], fontsize=7.5, ha="center")
+    ax.text(12.8, 2.8, "keyframe every\n5 frames", color=t["text2"], fontsize=9, ha="center")
+    ax.text(12.8, 6.0, "6 to 15\nmodels", color=t["text2"], fontsize=9, ha="center")
 
 
 def d_scene_models(ax, t):
@@ -93,22 +92,22 @@ def d_person_ens(ax, t):
     frame(ax, t)
     for k in range(3):
         dx, dy = 1.0 + 1.0 * k, 0.5 + 0.8 * k
-        ax.add_patch(Rectangle((dx, dy), 11, 6.2, fc=t["box"], ec=t["edge"], lw=1, zorder=2 + k))
-        person(ax, dx + 5.5, dy + 0.5, 2.4, t["s2"], alpha=0.35 if k < 2 else 1.0, pose=k % 2, z=3 + k)
-    ax.text(15.3, 1.0, "pixel\nmean", color=t["text2"], fontsize=7.5, ha="right")
+        ax.add_patch(Rectangle((dx, dy), 10, 6.2, fc=t["box"], ec=t["edge"], lw=1, zorder=2 + k))
+        person(ax, dx + 5.0, dy + 0.5, 2.4, t["s2"], alpha=0.35 if k < 2 else 1.0, pose=k % 2, z=3 + k)
+    ax.text(15.3, 1.0, "pixel\nmean", color=t["text2"], fontsize=9, ha="right")
 
 
 def d_projection(ax, t):
     frame(ax, t)
     for x, lab in ((0.6, "raw\nrender"), (5.4, "Difix\ntarget")):
         ax.add_patch(Rectangle((x, 5.0), 4.2, 3.3, fc=t["box"], ec=t["edge"], lw=1, zorder=2))
-        ax.text(x + 2.1, 6.65, lab, color=t["text2"], fontsize=7.5, ha="center", va="center")
+        ax.text(x + 2.1, 6.65, lab, color=t["text2"], fontsize=9, ha="center", va="center")
     ax.add_patch(Rectangle((11.0, 2.2), 4.4, 3.6, fc=t["s1"], alpha=0.35, ec=t["edge"], lw=1, zorder=2))
     ax.text(13.2, 4.0, "x", color=t["text"], fontsize=12, ha="center", va="center", style="italic")
     for x0, lab in ((2.7, "SSIM"), (7.5, "LPIPS")):
         ax.add_patch(FancyArrowPatch((x0, 4.9), (10.9, 4.0), arrowstyle="-|>", mutation_scale=8,
                                      color=t["muted"], lw=1, connectionstyle="arc3,rad=0.25", zorder=3))
-        ax.text(x0 + 0.6, 2.4, lab, color=t["text2"], fontsize=7.5, ha="center")
+        ax.text(x0 + 0.6, 2.4, lab, color=t["text2"], fontsize=9, ha="center")
 
 
 def d_difix(ax, t):
@@ -153,7 +152,7 @@ def d_colour(ax, t):
     ax.plot(1 + 14 * x, 1 + 7 * x, color=t["grid"], lw=2)
     ax.plot(1 + 14 * x, 1 + 7 * np.clip(x + 0.1 * x / (x + 0.1), 0, 1), color=t["s2"], lw=2)
     ax.plot(1 + 14 * x, 1 + 7 * np.clip(x * 1.15, 0, 1), color=t["s1"], lw=2)
-    ax.text(15, 1.4, "taper: 011\ngain: 007", color=t["text2"], fontsize=7.5, ha="right")
+    ax.text(15, 1.4, "taper: 011\ngain: 007", color=t["text2"], fontsize=9, ha="right")
 
 
 def d_submission(ax, t):
@@ -162,73 +161,68 @@ def d_submission(ax, t):
         for c in range(8):
             ax.add_patch(Rectangle((0.8 + c * 1.8, 0.6 + r * 1.45), 1.55, 1.2, fc=t["s1"] if r % 2 else t["s2"],
                                    alpha=0.22 + 0.12 * ((r + c) % 3), ec="none", zorder=2))
-    ax.text(8, 8.3, "5 scenes x 8 hidden views", color=t["text2"], fontsize=7.5, ha="center", va="center")
+    ax.text(8, 8.3, "5 scenes x 8 views", color=t["text2"], fontsize=9, ha="center", va="center")
 
 
 # --- layout -----------------------------------------------------------------------------------------------------
 CARDS = [  # key, column, row, drawing, title, subtitle, measured gain
-    ("in", 0, "mid", d_input, "6 training cameras", "8 hidden cameras to render\nat 4K, every 10th frame", None),
-    ("pm", 1, "top", d_person_models, "person models", "stride-5 keyframes, person loss x4,\n"
-     "masked pseudo-views, 60k iters", "+0.23 dB FG-PSNR from stride 5"),
-    ("sm", 1, "bot", d_scene_models, "scene models (7)", "dense VGGT depth, masked\n"
-     "pseudo-views, 4M Gaussians", "+0.63 dB from masked pseudo-views*"),
-    ("pe", 2, "top", d_person_ens, "person ensemble", "1/2 specialists + 1/2 diverse mix", "FG-LPIPS -0.027"),
-    ("pr", 2, "bot", d_projection, "perceptual projection", "LPIPS to Difix + 15 (1-SSIM) to raw",
-     "+0.20 dB (cross-target)"),
-    ("dx", 3, "top", d_difix, "Difix3D+ over 3 tile grids", "reference = nearest training view",
-     "LPIPS -0.049 from Difix"),
-    ("pl", 3, "bot", d_plate, "static plate", "temporal mean where the\nperson never appears", "SSIM +0.0057"),
-    ("cp", 4, "top", d_composite, "composite", "soft person mask, a = 0.85", None),
-    ("cc", 4, "bot", d_colour, "colour correction", "per-camera prior on\nthe two matched rigs", "+0.68 dB"),
-    ("sb", 5, "mid", d_submission, "2,056 images", "27.04 dB full, 25.78 dB FG\n3rd place", None),
+    ("in", 0, "mid", d_input, "6 cameras", "train on 6,\nrender 8 hidden\nviews at 4K", None),
+    ("pm", 1, "top", d_person_models, "person models", "stride-5 keyframes,\nperson-weighted loss", "+0.23 dB FG-PSNR"),
+    ("sm", 1, "bot", d_scene_models, "scene models", "dense depth, masked\npseudo-views", "+0.63 dB (val)*"),
+    ("pe", 2, "top", d_person_ens, "person ensemble", "specialists +\ndiverse mix", "FG-LPIPS -0.027"),
+    ("pr", 2, "bot", d_projection, "projection", "LPIPS to Difix,\nSSIM to raw", "+0.20 dB"),
+    ("dx", 3, "top", d_difix, "Difix3D+ TTA", "3 shifted\ntile grids", "LPIPS -0.049"),
+    ("pl", 3, "bot", d_plate, "static plate", "time average where\nthe person never is", "SSIM +0.0057"),
+    ("cp", 4, "top", d_composite, "composite", "soft mask +\ncolour prior", "+0.68 dB (colour)"),
+    ("sb", 4, "bot", d_submission, "2,056 images", "27.04 dB full\n25.78 dB FG", "3rd place"),
 ]
 ARROWS = [("in", "pm"), ("in", "sm"), ("pm", "pe"), ("sm", "pe"), ("sm", "pr"), ("pe", "dx"), ("pr", "pl"),
-          ("dx", "cp"), ("pl", "cp"), ("cp", "cc"), ("cc", "sb")]
+          ("dx", "cp"), ("pl", "cp"), ("cp", "sb")]
 
 
 def draw(mode):
     t = theme(mode)
-    fig = plt.figure(figsize=(FW, FH), dpi=200)
+    fig = plt.figure(figsize=(FW, FH), dpi=250)
     fig.patch.set_facecolor(t["surface"])
     bg = fig.add_axes([0, 0, 1, 1])
     bg.set_xlim(0, 1)
     bg.set_ylim(0, 1)
     bg.axis("off")
     for name, x0, x1 in COLS:
-        bg.add_patch(FancyBboxPatch((x0, 0.035), x1 - x0, 0.905, boxstyle="round,pad=0,rounding_size=0.008",
+        bg.add_patch(FancyBboxPatch((x0, 0.06), x1 - x0, 0.875, boxstyle="round,pad=0,rounding_size=0.01",
                                     fc=t["box"], ec="none", zorder=0))
-        bg.text((x0 + x1) / 2, 0.965, name, color=t["muted"], fontsize=12, fontweight="bold", ha="center",
+        bg.text((x0 + x1) / 2, 0.965, name, color=t["muted"], fontsize=14, fontweight="bold", ha="center",
                 va="center")
-    bg.text(0.143, 0.915, "PERSON BRANCH", color=t["s2"], fontsize=8.5, fontweight="bold")
-    bg.text(0.143, 0.472, "BACKGROUND BRANCH", color=t["s1"], fontsize=8.5, fontweight="bold")
-    bg.text(0.005, 0.012, "Measured on the official test evaluator unless marked *, which is validation scene 001_1. "
-            "Drawings are schematic; no dataset images are used.", color=t["muted"], fontsize=8.5)
+    bg.text(0.170, 0.905, "PERSON BRANCH", color=t["s2"], fontsize=10.5, fontweight="bold")
+    bg.text(0.170, 0.478, "BACKGROUND BRANCH", color=t["s1"], fontsize=10.5, fontweight="bold")
+    bg.text(0.005, 0.022, "Gains: official test scores; * = validation scene 001_1. Schematic drawings, no dataset "
+            "images.", color=t["muted"], fontsize=10)
     boxes = {}
     for key, col, row, fn, title, sub, gain in CARDS:
         _, x0, x1 = COLS[col]
         pad = 0.012
-        h = min(0.17, (x1 - x0 - 2 * pad) * (FW / FH) * 9 / 16)
+        h = min(0.18, (x1 - x0 - 2 * pad) * (FW / FH) * 9 / 16)
         w = h * (FH / FW) * 16 / 9
         x = (x0 + x1) / 2 - w / 2
         y = ROW_Y[row]
         ax = fig.add_axes([x, y, w, h])
         fn(ax, t)
         cx = x + w / 2
-        bg.text(cx, y - 0.028, title, color=t["text"], fontsize=10.5, fontweight="bold", ha="center", va="center")
-        bg.text(cx, y - 0.047, sub, color=t["text2"], fontsize=8.5, ha="center", va="top", linespacing=1.25)
+        bg.text(cx, y - 0.032, title, color=t["text"], fontsize=13, fontweight="bold", ha="center", va="center")
+        bg.text(cx, y - 0.058, sub, color=t["text2"], fontsize=11, ha="center", va="top", linespacing=1.2)
         if gain:
             nl = sub.count("\n") + 1
-            bg.text(cx, y - 0.056 - 0.024 * nl, gain, color=t["good"], fontsize=9, fontweight="bold",
+            bg.text(cx, y - 0.068 - 0.030 * nl, gain, color=t["good"], fontsize=11.5, fontweight="bold",
                     ha="center", va="top")
         boxes[key] = (x, y, w, h)
     for a, b in ARROWS:
         xa, ya, wa, ha = boxes[a]
         xb, yb, wb, hb = boxes[b]
         if xb > xa + wa:
-            p0, p1 = (xa + wa + 0.004, ya + ha / 2), (xb - 0.004, yb + hb / 2)
-        else:  # same column, top card feeds the card below
-            p0, p1 = (xa + wa / 2, ya - 0.125), (xb + wb / 2, yb + hb + 0.006)
-        bg.add_patch(FancyArrowPatch(p0, p1, arrowstyle="-|>", mutation_scale=12, color=t["muted"], lw=1.2,
+            p0, p1 = (xa + wa + 0.005, ya + ha / 2), (xb - 0.005, yb + hb / 2)
+        else:  # same column: top card feeds the card below
+            p0, p1 = (xa + wa / 2, ya - 0.175), (xb + wb / 2, yb + hb + 0.008)
+        bg.add_patch(FancyArrowPatch(p0, p1, arrowstyle="-|>", mutation_scale=14, color=t["muted"], lw=1.4,
                                      connectionstyle="arc3,rad=0", zorder=5))
     fig.savefig(FIG / f"pipeline_{mode}.png", facecolor=t["surface"])
     plt.close(fig)

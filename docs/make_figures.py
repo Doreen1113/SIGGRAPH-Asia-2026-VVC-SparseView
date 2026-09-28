@@ -98,7 +98,7 @@ def style(ax, t):
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
     ax.spines["bottom"].set_color(t["grid"])
-    ax.tick_params(colors=t["muted"], labelsize=9, length=0)
+    ax.tick_params(colors=t["muted"], labelsize=11.5, length=0)
     ax.yaxis.grid(True, color=t["grid"], linewidth=1)
     ax.set_axisbelow(True)
 
@@ -113,7 +113,7 @@ def write_csv():
 
 
 def progress(t, mode):
-    fig, ax = plt.subplots(figsize=(10, 4.6), dpi=200)
+    fig, ax = plt.subplots(figsize=(9, 5.2), dpi=200)
     fig.patch.set_facecolor(t["surface"])
     style(ax, t)
     x = list(range(1, len(SUBMISSIONS) + 1))
@@ -123,8 +123,8 @@ def progress(t, mode):
     ax.scatter(x, full, s=64, color=t["s1"], edgecolors=t["ring"], linewidths=2, label="Full image", zorder=3)
     ax.scatter(fgx, fg, s=64, color=t["s2"], edgecolors=t["ring"], linewidths=2,
                label="Foreground (person crop)", zorder=3)
-    ax.text(x[-1] + 0.9, full[-1], f"{full[-1]:.2f}  final", color=t["text"], va="center", fontsize=9)
-    ax.text(fgx[-1] + 0.9, fg[-1], f"{fg[-1]:.2f}  final", color=t["text"], va="center", fontsize=9)
+    ax.text(x[-1] + 0.9, full[-1], f"{full[-1]:.2f}  final", color=t["text"], va="center", fontsize=11.5)
+    ax.text(fgx[-1] + 0.9, fg[-1], f"{fg[-1]:.2f}  final", color=t["text"], va="center", fontsize=11.5)
 
     names = [r[0] for r in SUBMISSIONS]
     notes = [
@@ -140,14 +140,14 @@ def progress(t, mode):
     for name, series, label, (dx, dy) in notes:
         i = names.index(name)
         y = SUBMISSIONS[i][3] if series == "full" else SUBMISSIONS[i][6]
-        ax.annotate(label, xy=(i + 1, y), xytext=(i + 1 + dx, y + dy), fontsize=8.5, color=t["text2"],
+        ax.annotate(label, xy=(i + 1, y), xytext=(i + 1 + dx, y + dy), fontsize=11, color=t["text2"],
                     arrowprops=dict(arrowstyle="-", color=t["muted"], lw=0.8), ha="left", va="center")
     ax.set_xlim(0, len(x) + 7)
     ax.set_ylim(21.5, 28.5)
-    ax.set_ylabel("PSNR (dB)", color=t["text2"], fontsize=10)
-    ax.set_xlabel("scored submission, in upload order (09-03 to 09-17)", color=t["text2"], fontsize=10)
-    ax.set_title("Official PSNR of every scored submission", color=t["text"], fontsize=13, loc="left", pad=26)
-    leg = ax.legend(loc="upper left", bbox_to_anchor=(0, 1.1), ncol=2, frameon=False, fontsize=9)
+    ax.set_ylabel("PSNR (dB)", color=t["text2"], fontsize=13)
+    ax.set_xlabel("scored submission, in upload order (09-03 to 09-17)", color=t["text2"], fontsize=13)
+    ax.set_title("Official PSNR of every scored submission", color=t["text"], fontsize=17, loc="left", pad=26)
+    leg = ax.legend(loc="upper left", bbox_to_anchor=(0, 1.1), ncol=2, frameon=False, fontsize=11.5)
     for txt in leg.get_texts():
         txt.set_color(t["text2"])
     fig.tight_layout()
@@ -157,23 +157,23 @@ def progress(t, mode):
 
 def per_view(t, mode, pv):
     views = ["02", "10", "17", "18", "19", "33", "38", "46"]
-    fig, ax = plt.subplots(figsize=(10, 4.2), dpi=200)
+    fig, ax = plt.subplots(figsize=(9, 4.8), dpi=200)
     fig.patch.set_facecolor(t["surface"])
     style(ax, t)
     for i, v in enumerate(views):
         vals = [pv[m][v] for m, _ in PER_VIEW_MODELS]
         ax.plot([i, i], [min(vals), max(vals)], color=t["grid"], lw=2, zorder=2, solid_capstyle="round")
-        ax.text(i + 0.12, max(vals), f"{max(vals):.1f}", va="center", color=t["text2"], fontsize=8.5)
+        ax.text(i + 0.12, max(vals), f"{max(vals):.1f}", va="center", color=t["text2"], fontsize=11)
     for (m, label), c in zip(PER_VIEW_MODELS, (t["s1"], t["s2"], t["s3"])):
         ax.scatter(range(len(views)), [pv[m][v] for v in views], s=64, color=c, edgecolors=t["ring"],
                    linewidths=2, label=label, zorder=3)
     ax.set_xticks(range(len(views)), [f"view {v}" for v in views])
     ax.set_xlim(-0.5, len(views) - 0.2)
     ax.set_ylim(17, 33)
-    ax.set_ylabel("full-frame PSNR (dB)", color=t["text2"], fontsize=10)
+    ax.set_ylabel("full-frame PSNR (dB)", color=t["text2"], fontsize=13)
     ax.set_title("Per-view PSNR on validation scene 001_1 (4K, 3 frames per view)", color=t["text"],
-                 fontsize=13, loc="left", pad=26)
-    leg = ax.legend(loc="upper left", bbox_to_anchor=(0, 1.1), ncol=3, frameon=False, fontsize=9)
+                 fontsize=17, loc="left", pad=26)
+    leg = ax.legend(loc="upper left", bbox_to_anchor=(0, 1.1), ncol=3, frameon=False, fontsize=11.5)
     for txt in leg.get_texts():
         txt.set_color(t["text2"])
     fig.tight_layout()
